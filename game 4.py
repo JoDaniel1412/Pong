@@ -76,6 +76,10 @@ class Player(py.sprite.Sprite):
         self.image.fill(white)
         self.rect.center = poss
 
+    def pallet_segments(self):  # Metodo que retorna una lista con los segmentos de la paleta
+        segment = self.pallet_size / 3
+        return [self.rect.top] + [self.rect.top+segment] + [self.rect.bottom-segment] + [self.rect.bottom]
+
     def set_pallets_size(self):  # Metodo que ajusta el largo de la paleta segun dificultad
         if self.difficulty == 0:
             return 9
@@ -119,7 +123,10 @@ class Ball(py.sprite.Sprite):
         self.xSpeed = random.choice(self.speed)
         self.ySpeed = random.choice(self.speed)
 
-    def set_xSpeed(self):  # Metodo que hace a la pelota cambiar de direccion en caso de colisionar con la paleta
+    def get_ball_poss(self):
+        return self.rect.center
+
+    def set_xSpeed(self, collision):  # Metodo que hace a la pelota cambiar de direccion en caso de colisionar con la paleta
         self.xSpeed = -self.xSpeed
 
     def set_speed(self):  # Metodo que ajusta la velocidad de la pelota segun dificultad
@@ -180,13 +187,23 @@ while loop:
     clock.tick(FPS)
     for event in py.event.get():
         if event.type == py.QUIT or (event.type == py.KEYDOWN and event.key == py.K_ESCAPE):
+            loop = False
             py.quit()
             sys.exit()
 
     # Collisions
     if py.sprite.groupcollide(balls, players, False, False):
         for element in balls:
-            element.set_xSpeed()
+            for pallet in players:
+                ball_poss = element.get_ball_poss()[1]
+                pallet_segment = pallet.pallet_segments()
+                print(ball_poss, pallet_segment)
+                if pallet_segment[0] <= ball_poss < pallet_segment[1]:  # Revisa si la bola choca en la parte superior
+                    element.set_xSpeed('top')
+                if pallet_segment[1] <= ball_poss <= pallet_segment[2]:  # Revisa si la bola choca en la parte central
+                    element.set_xSpeed('center')
+                if pallet_segment[2] < ball_poss <= pallet_segment[3]:  # Revisa si la bola choca en la parte inferior
+                    element.set_xSpeed('bottom')
 
     # Update
     sprites.update()
