@@ -20,6 +20,6 @@ def load_interface(xPoss, yPoss, xWidth, fgColor, bgColor, fonts):
     playersLabel.place(x=xPoss + 20, y=yPoss + 100)
 
 
-load_interface(0, 0, 10, 'white', 'black', 'Arial')
+load_interface(0, 0, 10, 'white', 'black', 'Fixedsys 18')
 
 main.mainloop()

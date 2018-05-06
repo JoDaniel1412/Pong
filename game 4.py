@@ -39,18 +39,19 @@ class Game:
 
     def start_game(self):  # Metodo para iniciar el juego
         self.get_matrix()
+        images = self.load_images()
         poss1 = 38
         poss2 = 1000
         if self.players == 1:
-            humane = Player(('py.K_w', 'py.K_s'), self.difficulty, self.matrix[poss1], self.matrix, (True, 'HUMANE'))
-            cpu = Player('', self.difficulty, self.matrix[poss2], self.matrix, (True, 'CPU'))
+            humane = Player(('py.K_w', 'py.K_s'), self.difficulty, self.matrix[poss1], self.matrix, (True, 'HUMANE'), images[0])
+            cpu = Player('', self.difficulty, self.matrix[poss2], self.matrix, (True, 'CPU'), images[2])
             sprites.add(humane)
             sprites.add(cpu)
             players.add(humane)
             players.add(cpu)
         if self.players == 2:
-            humane1 = Player(('py.K_w', 'py.K_s'), self.difficulty, self.matrix[poss1], self.matrix, (True, 'HUMANE'))
-            humane2 = Player(('py.K_UP', 'py.K_DOWN'), self.difficulty, self.matrix[poss2], self.matrix, (True, 'HUMANE'))
+            humane1 = Player(('py.K_w', 'py.K_s'), self.difficulty, self.matrix[poss1], self.matrix, (True, 'HUMANE'), images[0])
+            humane2 = Player(('py.K_UP', 'py.K_DOWN'), self.difficulty, self.matrix[poss2], self.matrix, (True, 'HUMANE'), images[2])
             sprites.add(humane1)
             sprites.add(humane2)
             players.add(humane1)
@@ -59,11 +60,22 @@ class Game:
         sprites.add(ball)
         balls.add(ball)
 
+    def load_images(self):
+        player_red = py.image.load('img/player_red.png')
+        player_green = py.image.load('img/player_green.png')
+        player_pink = py.image.load('img/player_pink.png')
+        player_blue = py.image.load('img/player_blue.png')
+        p1 = py.transform.scale(player_red, (20, 1000))
+        py.transform.scale(player_green, (15, 60))
+        py.transform.scale(player_pink, (15, 40))
+        py.transform.scale(player_blue, (15, 100))
+        return [p1, player_green, player_blue, player_pink]
+
 
 # Clase que crea las paletas de los jugadores
 # Instancias: controles del jugador, difficultad, posicion de las paletas, la matrix, el estado(vivo, humano/computador)
 class Player(py.sprite.Sprite):
-    def __init__(self, keys, difficulty, poss, matrix, status):
+    def __init__(self, keys, difficulty, poss, matrix, status, image):
         py.sprite.Sprite.__init__(self)
         self.difficulty = difficulty
         size = self.set_pallets_size()
@@ -71,9 +83,8 @@ class Player(py.sprite.Sprite):
         self.status = status
         self.keys = keys
         self.speed = self.set_speed()
-        self.image = py.Surface((15, self.pallet_size))
+        self.image = image
         self.rect = self.image.get_rect()
-        self.image.fill(white)
         self.rect.center = poss
 
     def pallet_segments(self):  # Metodo que retorna una lista con los segmentos de la paleta
@@ -186,7 +197,7 @@ sprites = py.sprite.Group()
 players = py.sprite.Group()
 balls = py.sprite.Group()
 
-game = Game(2, 1, 1)
+game = Game(2, 1, 2)
 game.start_game()
 
 # Game loop
@@ -206,7 +217,6 @@ while loop:
             for pallet in players:
                 ball_poss = element.get_ball_poss()[1]
                 pallet_segment = pallet.pallet_segments()
-                print(ball_poss, pallet_segment)
                 if pallet_segment[0] <= ball_poss < pallet_segment[1]:  # Revisa si la bola choca en la parte superior
                     element.set_ySpeed('top')
                 if pallet_segment[1] <= ball_poss <= pallet_segment[2]:  # Revisa si la bola choca en la parte central
