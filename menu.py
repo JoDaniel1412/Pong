@@ -78,6 +78,8 @@ def load_interface(xPoss, yPoss, xWidth, fgColor, bgColor, fonts):
 
         volver =  Button(canvas2, text = "VOLVER", font = fonts +str(20),  fg="black", bg="White", borderwidth=0, command = cerrar_ajustes)
         volver.place(x = 10, y = 10)
+    #def puntuaciones():
+
 
 
 
