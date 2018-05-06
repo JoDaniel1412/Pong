@@ -7,7 +7,8 @@ W2, H2 = 800, 600
 main = Tk()
 main.minsize(W2, H2)
 main.resizable(NO, NO)
-Fondo_pong=PhotoImage(file="Imagenes/Imagen de menu de pong.gif")
+Fondo_pong = PhotoImage(file="img/Imagen de menu de pong.gif")
+
 
 # Interface
 def load_interface(xPoss, yPoss, xWidth, fgColor, bgColor, fonts):
@@ -26,9 +27,8 @@ def load_interface(xPoss, yPoss, xWidth, fgColor, bgColor, fonts):
     playersOption = Button(mainCanvas, text='Options', font=fonts + str(30), fg=fgColor, bg=bgColor, width=xWidth,justify=RIGHT, borderwidth=0)
     playersOption.place(x=xPoss + 290, y=yPoss + 370)
 
-    playersHightscore =  Button(mainCanvas, text='Scores', font=fonts + str(30), fg=fgColor, bg=bgColor, width=xWidth,justify=RIGHT, borderwidth=0)
+    playersHightscore = Button(mainCanvas, text='Scores', font=fonts + str(30), fg=fgColor, bg=bgColor, width=xWidth,justify=RIGHT, borderwidth=0)
     playersHightscore.place(x=xPoss + 290, y=yPoss + 430)
-
 
 
 load_interface(0, 0, 10, 'white', 'black', 'Fixedsys ')
