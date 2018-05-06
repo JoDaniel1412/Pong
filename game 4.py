@@ -207,7 +207,7 @@ class Ball(py.sprite.Sprite):
             return 10
 
     def new_ball(self):  # Metodo que crea una bola cada vez que se anota un punto
-        newBall = Ball(self.difficulty)
+        newBall = Ball(self.difficulty, self.image)
         sprites.add(newBall)
         balls.add(newBall)
 
