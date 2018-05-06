@@ -126,7 +126,15 @@ class Ball(py.sprite.Sprite):
     def get_ball_poss(self):
         return self.rect.center
 
-    def set_xSpeed(self, collision):  # Metodo que hace a la pelota cambiar de direccion en caso de colisionar con la paleta
+    def set_ySpeed(self, collision):  # Metodo que hace a la pelota cambiar de direccion en caso de colisionar con la paleta
+        if collision == 'top':
+            self.ySpeed = self.speed[0]
+        if collision == 'center':
+            self.ySpeed = 0
+        if collision == 'bottom':
+            self.ySpeed = self.speed[1]
+
+    def set_xSpeed(self):
         self.xSpeed = -self.xSpeed
 
     def set_speed(self):  # Metodo que ajusta la velocidad de la pelota segun dificultad
@@ -194,16 +202,17 @@ while loop:
     # Collisions
     if py.sprite.groupcollide(balls, players, False, False):
         for element in balls:
+            element.set_xSpeed()
             for pallet in players:
                 ball_poss = element.get_ball_poss()[1]
                 pallet_segment = pallet.pallet_segments()
                 print(ball_poss, pallet_segment)
                 if pallet_segment[0] <= ball_poss < pallet_segment[1]:  # Revisa si la bola choca en la parte superior
-                    element.set_xSpeed('top')
+                    element.set_ySpeed('top')
                 if pallet_segment[1] <= ball_poss <= pallet_segment[2]:  # Revisa si la bola choca en la parte central
-                    element.set_xSpeed('center')
+                    element.set_ySpeed('center')
                 if pallet_segment[2] < ball_poss <= pallet_segment[3]:  # Revisa si la bola choca en la parte inferior
-                    element.set_xSpeed('bottom')
+                    element.set_ySpeed('bottom')
 
     # Update
     sprites.update()
