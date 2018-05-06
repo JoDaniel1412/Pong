@@ -65,11 +65,7 @@ class Game:
         player_green = py.image.load('img/player_green.png')
         player_pink = py.image.load('img/player_pink.png')
         player_blue = py.image.load('img/player_blue.png')
-        p1 = py.transform.scale(player_red, (20, 1000))
-        py.transform.scale(player_green, (15, 60))
-        py.transform.scale(player_pink, (15, 40))
-        py.transform.scale(player_blue, (15, 100))
-        return [p1, player_green, player_blue, player_pink]
+        return [player_red, player_green, player_pink, player_blue]
 
 
 # Clase que crea las paletas de los jugadores
@@ -83,7 +79,7 @@ class Player(py.sprite.Sprite):
         self.status = status
         self.keys = keys
         self.speed = self.set_speed()
-        self.image = image
+        self.image = py.transform.scale(image, (20, self.pallet_size))
         self.rect = self.image.get_rect()
         self.rect.center = poss
 
@@ -172,7 +168,7 @@ class Ball(py.sprite.Sprite):
     def update(self):  # Metodo que actualiza la posicion de la pelota en la pantalla
         self.rect.x += self.xSpeed
         self.rect.y += self.ySpeed
-        if self.rect.y < 0 or self.rect.y > H:
+        if self.rect.top < 0 or self.rect.bottom > H:
             self.ySpeed = -self.ySpeed
         if self.rect.left < 0:
             time.sleep(1)
