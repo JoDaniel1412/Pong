@@ -12,7 +12,7 @@ Fondo_pong = PhotoImage(file="img/Imagen de menu de pong.gif")
 
 # Interface
 def load_interface(xPoss, yPoss, xWidth, fgColor, bgColor, fonts):
-    #Ventana de ajustes
+    # Ventana de ajustes
     def ajustes():
         main.withdraw()
         ventana2 = Toplevel()
@@ -28,7 +28,7 @@ def load_interface(xPoss, yPoss, xWidth, fgColor, bgColor, fonts):
     tittleLabel = Label(mainCanvas, image=Fondo_pong, borderwidth=0)
     tittleLabel.place(x=xPoss+5, y=yPoss-50)
 
-    playersButton1 = Button(mainCanvas, text='1 Player', font=fonts +str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0)
+    playersButton1 = Button(mainCanvas, text='1 Player', font=fonts + str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0)
     playersButton1.place(x=xPoss + 290, y=yPoss + 250)
 
     playersButton2 = Button(mainCanvas, text='2 Player', font=fonts + str(30), fg=fgColor, bg=bgColor, width=xWidth,justify=RIGHT, borderwidth=0)
@@ -37,8 +37,8 @@ def load_interface(xPoss, yPoss, xWidth, fgColor, bgColor, fonts):
     playersOption = Button(mainCanvas, text='Options', font=fonts + str(30), fg=fgColor, bg=bgColor, width=xWidth,justify=RIGHT, borderwidth=0, command=ajustes)
     playersOption.place(x=xPoss + 290, y=yPoss + 370)
 
-    playersHightscore = Button(mainCanvas, text='Scores', font=fonts + str(30), fg=fgColor, bg=bgColor, width=xWidth,justify=RIGHT, borderwidth=0)
-    playersHightscore.place(x=xPoss + 290, y=yPoss + 430)
+    playersHighScore = Button(mainCanvas, text='Scores', font=fonts + str(30), fg=fgColor, bg=bgColor, width=xWidth,justify=RIGHT, borderwidth=0)
+    playersHighScore.place(x=xPoss + 290, y=yPoss + 430)
 
 
 load_interface(0, 0, 10, 'white', 'black', 'Fixedsys ')
