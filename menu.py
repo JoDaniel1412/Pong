@@ -6,6 +6,7 @@ W2, H2 = 800, 600
 main = Tk()
 main.minsize(W2, H2)
 main.resizable(NO, NO)
+main.title('Pong')
 Fondo_pong = PhotoImage(file="img/Imagen de menu de pong.gif")
 
 
