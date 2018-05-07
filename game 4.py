@@ -12,7 +12,7 @@ blue = (0, 0, 255)
 yellow = (255, 255, 0)
 
 # Variables
-W, H = 1400, 800
+W, H = 1500, 800
 HW, HH = W / 2, H / 2
 FPS = 60
 
@@ -86,6 +86,14 @@ class Game:
 
     def load_images(self):  # Metodo para cargar imagenes
         pallet_images = []
+        if self.style == 0:
+            white_pallet = py.Surface((10, 20))
+            white_pallet.fill(white)
+            ball = py.Surface((10, 10))
+            ball.fill(white)
+            bg = py.image.load('img/deffault_bg.png').convert()
+            bg = py.transform.scale(bg, (W, H))
+            pallet_images = [white_pallet, white_pallet, white_pallet, white_pallet]
         if self.style == 1:
             player_red = py.image.load('img/player_red.png').convert_alpha()
             player_green = py.image.load('img/player_green.png').convert_alpha()
@@ -104,15 +112,15 @@ class Game:
         return pallet_images, ball, bg
 
     def load_sounds(self):
+        if self.style == 0:
+            bounce = py.mixer.Sound('sound/deffault_bounce.wav')
+            score = py.mixer.Sound('sound/deffault_score.wav')
         if self.style == 1:
             bounce = py.mixer.Sound('sound/neon_bounce.wav')
             score = py.mixer.Sound('sound/neon_score.wav')
         if self.style == 2:
             bounce = py.mixer.Sound('sound/baseball_bounce.wav')
             score = py.mixer.Sound('sound/baseball_bounce.wav')
-        if self.style == 0:
-            bounce = py.mixer.Sound('sound/deffault_bounce.wav')
-            score = py.mixer.Sound('sound/deffault_score.wav')
         return bounce, score
 
     def get_sound_effects(self):
@@ -158,6 +166,13 @@ class Player(py.sprite.Sprite):
         if self.difficulty == 2:
             speed = 15
         return speed
+
+    def increase_xSpeed(self):
+        self.speed_limit = 30
+        if self.speed_limit > self.speed > 0:
+            self.speed += 1
+        if -self.speed_limit < self.speed < 0:
+            self.speed -= 1
 
     def set_status(self, boolean):
         self.status[0] = boolean
@@ -216,6 +231,13 @@ class Ball(py.sprite.Sprite):
     def set_xSpeed(self):
         self.xSpeed = -self.xSpeed
 
+    def increase_xSpeed(self):
+        self.speed_limit = 30
+        if self.speed_limit > self.xSpeed > 0:
+            self.xSpeed += 1
+        if -self.speed_limit < self.xSpeed < 0:
+            self.xSpeed -= 1
+
     def set_speed(self):  # Metodo que ajusta la velocidad de la pelota segun dificultad
         if self.difficulty == 0:
             speed_range = [-6, 6]
@@ -270,7 +292,7 @@ sprites = py.sprite.Group()
 players = py.sprite.Group()
 balls = py.sprite.Group()
 
-game = Game(2, 1, 1, 2)
+game = Game(2, 1, 1, 0)
 game.start_game()
 
 # Game loop
@@ -301,6 +323,8 @@ while loop:
                     element.set_ySpeed('center')
                 if pallet_segment[2] < ball_poss <= pallet_segment[3]:  # Revisa si la bola choca en la parte inferior
                     element.set_ySpeed('bottom')
+                element.increase_xSpeed()
+                pallet.increase_xSpeed()
 
     # Update
     sprites.update()
