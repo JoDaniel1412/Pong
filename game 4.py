@@ -15,6 +15,7 @@ yellow = (255, 255, 0)
 W, H = 1500, 800
 HW, HH = W / 2, H / 2
 FPS = 60
+secs = 0
 
 
 # Clase usada para iniciar el juego con determinados ajustes
@@ -84,48 +85,62 @@ class Game:
         sprites.add(ball)
         balls.add(ball)
 
-    def load_images(self):  # Metodo para cargar imagenes
-        pallet_images = []
+    def load_images(self):  # Metodo para cargar imagenes del juego
+        pallet_images = None
+        ball = None
+        bg = None
         if self.style == 0:
-            white_pallet = py.Surface((10, 20))
-            white_pallet.fill(white)
+            white_pallet = py.image.load('img/default_pallet.png').convert_alpha()
             ball = py.Surface((10, 10))
             ball.fill(white)
-            bg = py.image.load('img/deffault_bg.png').convert()
+            bg = py.image.load('img/default_bg.png').convert()
             bg = py.transform.scale(bg, (W, H))
             pallet_images = [white_pallet, white_pallet, white_pallet, white_pallet]
         if self.style == 1:
-            player_red = py.image.load('img/player_red.png').convert_alpha()
-            player_green = py.image.load('img/player_green.png').convert_alpha()
-            player_pink = py.image.load('img/player_pink.png').convert_alpha()
-            player_blue = py.image.load('img/player_blue.png').convert_alpha()
+            player_red = py.image.load('img/neon_red.png').convert_alpha()
+            player_green = py.image.load('img/neon_green.png').convert_alpha()
+            player_pink = py.image.load('img/neon_pink.png').convert_alpha()
+            player_blue = py.image.load('img/neon_blue.png').convert_alpha()
             ball = py.image.load('img/neon_ball.png').convert_alpha()
             bg = py.image.load('img/neon_bg.png').convert()
             bg = py.transform.scale(bg, (W, H))
             pallet_images = [player_red, player_green, player_pink, player_blue]
         if self.style == 2:
-            player_bat = py.image.load('img/player_bat.png').convert_alpha()
+            player_bat = py.image.load('img/baseball_bat.png').convert_alpha()
             ball = py.image.load('img/baseball_ball.png').convert_alpha()
             pallet_images = [player_bat, player_bat, player_bat, player_bat]
             bg = py.image.load('img/baseball_bg.png').convert()
             bg = py.transform.scale(bg, (W, H))
         return pallet_images, ball, bg
 
-    def load_sounds(self):
+    def load_sounds(self):  # Metodo para cargar la musica del juego
+        bounce = None
+        score = None
+        music = None
         if self.style == 0:
-            bounce = py.mixer.Sound('sound/deffault_bounce.wav')
-            score = py.mixer.Sound('sound/deffault_score.wav')
+            bounce = py.mixer.Sound('sound/default_bounce.wav')
+            score = py.mixer.Sound('sound/default_score.wav')
+            music = py.mixer.Sound('sound/default_music.wav')
         if self.style == 1:
             bounce = py.mixer.Sound('sound/neon_bounce.wav')
             score = py.mixer.Sound('sound/neon_score.wav')
+            music = py.mixer.Sound('sound/neon_music.wav')
         if self.style == 2:
             bounce = py.mixer.Sound('sound/baseball_bounce.wav')
-            score = py.mixer.Sound('sound/baseball_bounce.wav')
-        return bounce, score
+            score = py.mixer.Sound('sound/baseball_score.wav')
+            music = py.mixer.Sound('sound/baseball_music.wav')
+        return bounce, score, music
 
-    def get_sound_effects(self):
+    def get_sound_effects(self):  # Metodo para obtener los sonidos del juego
         return self.sound_effects
 
+    def score1(self):  # Metodo que ajusta el puntaje del jugador 1
+        for pallets in players:
+            pallets.reset_speed()
+
+    def score2(self):  # Metodo que ajusta el puntaje del jugador 2
+        for pallets in players:
+            pallets.reset_speed()
 
 
 # Clase que crea las paletas de los jugadores
@@ -141,15 +156,18 @@ class Player(py.sprite.Sprite):
         self.keys = keys
         self.matrix = matrix
         self.speed = self.set_speed()
-        self.image = py.transform.scale(image, (20, self.pallet_size))
+        self.default_speed = self.speed
+        self.image = py.transform.scale(image, (25, self.pallet_size))
         self.rect = self.image.get_rect()
         self.rect.center = self.matrix[poss]
+        self.speed_limit = 30
 
     def pallet_segments(self):  # Metodo que retorna una lista con los segmentos de la paleta
         segment = self.pallet_size / 3
         return [self.rect.top] + [self.rect.top+segment] + [self.rect.bottom-segment] + [self.rect.bottom]
 
     def set_pallets_size(self):  # Metodo que ajusta el largo de la paleta segun dificultad
+        large = 0
         if self.difficulty == 0:
             large = 9
         if self.difficulty == 1:
@@ -159,20 +177,23 @@ class Player(py.sprite.Sprite):
         return large
 
     def set_speed(self):  # Metodo que ajusta la velocidad de la paleta segun dificultad
+        speed = 0
         if self.difficulty == 0:
-            speed =  7
+            speed = 7
         if self.difficulty == 1:
             speed = 10
         if self.difficulty == 2:
             speed = 15
         return speed
 
-    def increase_xSpeed(self):
-        self.speed_limit = 30
+    def increase_xSpeed(self):  # Metodo para aumentar la velocidad progresivamente
         if self.speed_limit > self.speed > 0:
             self.speed += 1
         if -self.speed_limit < self.speed < 0:
             self.speed -= 1
+
+    def reset_speed(self):
+        self.speed = self.default_speed
 
     def set_status(self, boolean):
         self.status[0] = boolean
@@ -209,15 +230,23 @@ class Ball(py.sprite.Sprite):
         self.difficulty = difficulty
         self.poss = (HW, HH)
         self.size = self.set_size()
-        self.image = py.transform.scale(image, (self.size, self.size))
+        self.original_image = py.transform.scale(image, (self.size, self.size))
+        self.image = self.original_image
         self.rect = self.image.get_rect()
         self.rect.center = self.poss
         self.speed = self.set_speed()
         self.xSpeed = random.choice(self.speed)
         self.ySpeed = random.choice(self.speed)
         self.sound_effects = game.get_sound_effects()
+        self.speed_limit = 30
+        self.rotation_speed = 7
+        self.last_rotation = 0
 
-    def get_ball_poss(self):
+    def rotate(self):
+        self.last_rotation += self.rotation_speed
+        self.image = py.transform.rotate(self.original_image, self.last_rotation)
+
+    def get_ball_poss(self):  # Metodo para obtener la posicion de la bola
         return self.rect.center
 
     def set_ySpeed(self, collision):  # Metodo que hace a la pelota cambiar de direccion en caso de colisionar con la paleta
@@ -228,17 +257,17 @@ class Ball(py.sprite.Sprite):
         if collision == 'bottom':
             self.ySpeed = self.speed[1]
 
-    def set_xSpeed(self):
+    def set_xSpeed(self):  # Metodo para invertir la direccion de la bola al rebotar
         self.xSpeed = -self.xSpeed
 
-    def increase_xSpeed(self):
-        self.speed_limit = 30
+    def increase_xSpeed(self):  # Metodo para aumentar la velocidad progresivamente
         if self.speed_limit > self.xSpeed > 0:
             self.xSpeed += 1
         if -self.speed_limit < self.xSpeed < 0:
             self.xSpeed -= 1
 
     def set_speed(self):  # Metodo que ajusta la velocidad de la pelota segun dificultad
+        speed_range = [0, 0]
         if self.difficulty == 0:
             speed_range = [-6, 6]
         if self.difficulty == 1:
@@ -248,20 +277,22 @@ class Ball(py.sprite.Sprite):
         return speed_range
 
     def set_size(self):  # Metodo que ajusta el radio de la bola segun dificultad
+        ball_size = 0
         if self.difficulty == 0:
             ball_size = 55
         if self.difficulty == 1:
             ball_size = 40
         if self.difficulty == 2:
             ball_size = 25
-        return  ball_size
+        return ball_size
 
     def new_ball(self):  # Metodo que crea una bola cada vez que se anota un punto
-        newBall = Ball(self.difficulty, self.image)
+        newBall = Ball(self.difficulty, self.original_image)
         sprites.add(newBall)
         balls.add(newBall)
 
     def update(self):  # Metodo que actualiza la posicion de la pelota en la pantalla
+        self.rotate()
         self.rect.x += self.xSpeed
         self.rect.y += self.ySpeed
         if self.rect.top < 0 or self.rect.bottom > H:
@@ -269,12 +300,13 @@ class Ball(py.sprite.Sprite):
             self.sound_effects[0].play()
         if self.rect.left < 0:
             self.sound_effects[1].play()
+            game.score2()
             time.sleep(1)
             self.kill()
             self.new_ball()
-
         if self.rect.right > W:
             self.sound_effects[1].play()
+            game.score1()
             time.sleep(1)
             self.kill()
             self.new_ball()
@@ -292,8 +324,13 @@ sprites = py.sprite.Group()
 players = py.sprite.Group()
 balls = py.sprite.Group()
 
+# Inicia la Clase Game
 game = Game(2, 1, 1, 0)
 game.start_game()
+
+# Cargar fondo y sonidos
+back_grounds = game.load_images()[2]
+sound_effects = game.get_sound_effects()
 
 # Game loop
 loop = True
@@ -305,9 +342,10 @@ while loop:
             py.quit()
             sys.exit()
 
-    # Sound
-    sound_effects = game.get_sound_effects()
-    back_grounds = game.load_images()[2]
+    # Time
+    start_time = py.time.get_ticks()//1000
+    if secs == start_time:
+        secs += 1
 
     # Collisions
     if py.sprite.groupcollide(balls, players, False, False):
@@ -328,6 +366,8 @@ while loop:
 
     # Update
     sprites.update()
+    if not py.mixer.get_busy():
+        sound_effects[2].play()
 
     # Draw
     display.blit(back_grounds, (0, 0))
