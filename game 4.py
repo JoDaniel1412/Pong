@@ -325,7 +325,7 @@ players = py.sprite.Group()
 balls = py.sprite.Group()
 
 # Inicia la Clase Game
-game = Game(2, 1, 1, 0)
+game = Game(2, 1, 1, 1)
 game.start_game()
 
 # Cargar fondo y sonidos
