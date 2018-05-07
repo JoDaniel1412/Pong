@@ -44,13 +44,13 @@ class Game:
         self.get_matrix()
         images = self.images[0]
         poss1 = 38
-        poss2 = 1000
-        poss3 = 43
-        poss4 = 1005
+        poss2 = 1026
+        poss3 = poss1 + 5
+        poss4 = poss2 + 5
         if self.players == 1:
             if self.pallets == 2:
-                poss1 = 34
-                poss2 = 996
+                poss1 -= 4
+                poss2 -= 4
                 humane2 = Player(('py.K_w', 'py.K_s'), self.difficulty, poss3, self.matrix, [True, 'HUMANE'], images[1], self.pallets)
                 cpu2 = Player('', self.difficulty, poss4, self.matrix, [True, 'CPU'], images[3], self.pallets)
                 sprites.add(humane2)
@@ -66,8 +66,8 @@ class Game:
 
         if self.players == 2:
             if self.pallets == 2:
-                poss1 = 34
-                poss2 = 996
+                poss1 -= 4
+                poss2 -= 4
                 humane1 = Player(('py.K_w', 'py.K_s'), self.difficulty, poss3, self.matrix, [True, 'HUMANE'], images[1], self.pallets)
                 humane2 = Player(('py.K_UP', 'py.K_DOWN'), self.difficulty, poss4, self.matrix, [True, 'HUMANE'], images[3], self.pallets)
                 sprites.add(humane1)
