@@ -29,8 +29,11 @@ class Game:
         self.images = self.load_images()
         self.sound_effects = self.load_sounds()
         self.matrix = []
+        self.make_matrix()
+        self.score1 = 0
+        self.score2 = 0
 
-    def get_matrix(self):  # Metodo para generar matriz
+    def make_matrix(self):  # Metodo para generar matriz
         n, m = 25, 40
         i, j = 0, 0
         x, y = W // m, H // n
@@ -41,8 +44,10 @@ class Game:
             i += x
             j = 0
 
+    def get_matrix(self):
+        return self.matrix
+
     def start_game(self):  # Metodo para iniciar el juego
-        self.get_matrix()
         images = self.images[0]
         poss1 = 38
         poss2 = 1026
@@ -134,13 +139,27 @@ class Game:
     def get_sound_effects(self):  # Metodo para obtener los sonidos del juego
         return self.sound_effects
 
-    def score1(self):  # Metodo que ajusta el puntaje del jugador 1
+    def add_score1(self):  # Metodo que ajusta el puntaje del jugador 1
+        self.score1 += 1
         for pallets in players:
             pallets.reset_speed()
 
-    def score2(self):  # Metodo que ajusta el puntaje del jugador 2
+    def add_score2(self):  # Metodo que ajusta el puntaje del jugador 2
+        self.score2 += 1
         for pallets in players:
             pallets.reset_speed()
+
+    def get_scores(self):
+        return self.score1, self.score2
+
+
+def draw_text(surf, text, poss, font):
+    font_type = py.font.match_font(font[0])
+    make_font = py.font.Font(font_type, font[1])
+    text_surface = make_font.render(text, True, font[2])
+    rect = text_surface.get_rect()
+    rect.center = poss
+    surf.blit(text_surface, rect)
 
 
 # Clase que crea las paletas de los jugadores
@@ -321,13 +340,13 @@ class Ball(py.sprite.Sprite):
             self.sound_effects[0].play()
         if self.rect.left < 0:
             self.sound_effects[1].play()
-            game.score2()
+            game.add_score2()
             time.sleep(1)
             self.kill()
             self.new_ball()
         if self.rect.right > W:
             self.sound_effects[1].play()
-            game.score1()
+            game.add_score1()
             time.sleep(1)
             self.kill()
             self.new_ball()
@@ -346,12 +365,13 @@ players = py.sprite.Group()
 balls = py.sprite.Group()
 
 # Inicia la Clase Game
-game = Game(1, 2, 1, 0)
+game = Game(1, 1, 1, 2)
 game.start_game()
 
 # Cargar fondo y sonidos
 back_grounds = game.load_images()[2]
 sound_effects = game.get_sound_effects()
+M = game.get_matrix()
 
 # Game loop
 loop = True
@@ -393,5 +413,7 @@ while loop:
     # Draw
     display.blit(back_grounds, (0, 0))
     sprites.draw(display)
+    draw_text(display, str(game.get_scores()[0]), M[366], ('Fixedsys', 80, white))
+    draw_text(display, str(game.get_scores()[1]), M[652], ('Fixedsys', 80, white))
 
     py.display.update()
