@@ -12,7 +12,7 @@ blue = (0, 0, 255)
 yellow = (255, 255, 0)
 
 # Variables
-W, H = 1500, 800
+W, H = 1000, 600
 HW, HH = W / 2, H / 2
 FPS = 60
 secs = 0
@@ -207,7 +207,16 @@ class Player(py.sprite.Sprite):
                 if k[eval(self.keys[1])]:
                     self.rect.y += self.speed
             if self.status[0] and self.status[1] == 'CPU':
-                pass
+                for ball in balls:
+                    y = ball.get_ball_yPoss()
+                    if self.difficulty == 2:
+                        self.rect.y = y
+                    if self.difficulty == 1:
+                        if secs % 2 == 0:
+                            self.rect.y = y
+                    if self.difficulty == 0:
+                        if secs % 3 == 0:
+                            self.rect.y = y
             if self.rect.bottom < 0:
                 self.rect.top = H
             if self.rect.top > H:
@@ -219,7 +228,16 @@ class Player(py.sprite.Sprite):
                 if k[eval(self.keys[1])] and self.rect.bottom < H:
                     self.rect.y += self.speed
             if self.status[0] and self.status[1] == 'CPU':
-                pass
+                for ball in balls:
+                    y = ball.get_ball_yPoss()
+                    if self.difficulty == 2:
+                        self.rect.y = y
+                    if self.difficulty == 1:
+                        if secs % 2 == 0:
+                            self.rect.y = y
+                    if self.difficulty == 0:
+                        if secs % 3 == 0:
+                            self.rect.y = y
 
 
 # Clase que crea la pelota
@@ -242,12 +260,15 @@ class Ball(py.sprite.Sprite):
         self.rotation_speed = 7
         self.last_rotation = 0
 
-    def rotate(self):
+    def rotate(self):  # Metodo para rotar la imagen de la bola
         self.last_rotation += self.rotation_speed
         self.image = py.transform.rotate(self.original_image, self.last_rotation)
 
     def get_ball_poss(self):  # Metodo para obtener la posicion de la bola
         return self.rect.center
+
+    def get_ball_yPoss(self):
+        return self.rect.y
 
     def set_ySpeed(self, collision):  # Metodo que hace a la pelota cambiar de direccion en caso de colisionar con la paleta
         if collision == 'top':
@@ -325,7 +346,7 @@ players = py.sprite.Group()
 balls = py.sprite.Group()
 
 # Inicia la Clase Game
-game = Game(2, 1, 1, 1)
+game = Game(1, 2, 1, 0)
 game.start_game()
 
 # Cargar fondo y sonidos
