@@ -335,7 +335,7 @@ class Ball(py.sprite.Sprite):
         self.rotate()
         self.rect.x += self.xSpeed
         self.rect.y += self.ySpeed
-        if self.rect.top < 0 or self.rect.bottom > H:
+        if self.rect.top <= 0 or self.rect.bottom >= H:
             self.ySpeed = -self.ySpeed
             self.sound_effects[0].play()
         if self.rect.left < 0:
@@ -365,7 +365,7 @@ players = py.sprite.Group()
 balls = py.sprite.Group()
 
 # Inicia la Clase Game
-game = Game(1, 1, 1, 2)
+game = Game(1, 1, 1, 1)
 game.start_game()
 
 # Cargar fondo y sonidos
@@ -390,11 +390,12 @@ while loop:
         secs += 1
 
     # Collisions
-    if py.sprite.groupcollide(balls, players, False, False):
+    hits = py.sprite.groupcollide(players, balls, False, False)
+    if hits:
         sound_effects[0].play()
         for element in balls:
             element.set_xSpeed()
-            for pallet in players:
+            for pallet in hits:
                 ball_poss = element.get_ball_poss()[1]
                 pallet_segment = pallet.pallet_segments()
                 if pallet_segment[0] <= ball_poss < pallet_segment[1]:  # Revisa si la bola choca en la parte superior
