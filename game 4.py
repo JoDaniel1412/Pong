@@ -381,8 +381,7 @@ while loop:
     for event in py.event.get():
         if event.type == py.QUIT or (event.type == py.KEYDOWN and event.key == py.K_ESCAPE):
             loop = False
-            py.quit()
-            sys.exit()
+            loop = False
 
     # Time
     start_time = py.time.get_ticks()//1000
@@ -417,3 +416,6 @@ while loop:
     draw_text(display, str(game.get_scores()[1]), M[652], ('arial', 80, white))
 
     py.display.update()
+
+
+py.quit()
