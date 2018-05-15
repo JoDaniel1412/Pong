@@ -12,7 +12,7 @@ blue = (0, 0, 255)
 yellow = (255, 255, 0)
 
 # Variables
-W, H = 1000, 600
+W, H = 1600, 900
 HW, HH = W / 2, H / 2
 FPS = 60
 secs = 0
@@ -125,15 +125,15 @@ class Game:
         if self.style == 0:
             bounce = py.mixer.Sound('sound/default_bounce.wav')
             score = py.mixer.Sound('sound/default_score.wav')
-            music = py.mixer.Sound('sound/default_music.wav')
+            music = py.mixer.Sound('sound/default_music.ogg')
         if self.style == 1:
             bounce = py.mixer.Sound('sound/neon_bounce.wav')
             score = py.mixer.Sound('sound/neon_score.wav')
-            music = py.mixer.Sound('sound/neon_music.wav')
+            music = py.mixer.Sound('sound/neon_music.ogg')
         if self.style == 2:
             bounce = py.mixer.Sound('sound/baseball_bounce.wav')
             score = py.mixer.Sound('sound/baseball_score.wav')
-            music = py.mixer.Sound('sound/baseball_music.wav')
+            music = py.mixer.Sound('sound/baseball_music.ogg')
         return bounce, score, music
 
     def get_sound_effects(self):  # Metodo para obtener los sonidos del juego
@@ -179,7 +179,7 @@ class Player(py.sprite.Sprite):
         self.image = py.transform.scale(image, (25, self.pallet_size))
         self.rect = self.image.get_rect()
         self.rect.center = self.matrix[poss]
-        self.speed_limit = 30
+        self.speed_limit = 40
 
     def pallet_segments(self):  # Metodo que retorna una lista con los segmentos de la paleta
         segment = self.pallet_size / 3
@@ -275,7 +275,7 @@ class Ball(py.sprite.Sprite):
         self.xSpeed = random.choice(self.speed)
         self.ySpeed = random.choice(self.speed)
         self.sound_effects = game.get_sound_effects()
-        self.speed_limit = 30
+        self.speed_limit = 55
         self.rotation_speed = 7
         self.last_rotation = 0
 
@@ -306,7 +306,7 @@ class Ball(py.sprite.Sprite):
         if -self.speed_limit < self.xSpeed < 0:
             self.xSpeed -= 1
 
-    def set_speed(self):  # Metodo que ajusta la velocidad de la pelota segun dificultad
+    def set_speed(self):  # Metodo que ajusta la velocidad de la pelota segun dificultads
         speed_range = [0, 0]
         if self.difficulty == 0:
             speed_range = [-6, 6]
@@ -371,6 +371,7 @@ game.start_game()
 # Cargar fondo y sonidos
 back_grounds = game.load_images()[2]
 sound_effects = game.get_sound_effects()
+sound_effects[2].play(loops=-1)
 M = game.get_matrix()
 
 # Game loop
@@ -407,13 +408,11 @@ while loop:
 
     # Update
     sprites.update()
-    if not py.mixer.get_busy():
-        sound_effects[2].play()
 
     # Draw
     display.blit(back_grounds, (0, 0))
     sprites.draw(display)
-    draw_text(display, str(game.get_scores()[0]), M[366], ('Fixedsys', 80, white))
-    draw_text(display, str(game.get_scores()[1]), M[652], ('Fixedsys', 80, white))
+    draw_text(display, str(game.get_scores()[0]), M[366], ('arial', 80, white))
+    draw_text(display, str(game.get_scores()[1]), M[652], ('arial', 80, white))
 
     py.display.update()
