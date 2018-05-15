@@ -151,6 +151,16 @@ class Game:
     def get_scores(self):
         return self.score1, self.score2
 
+    def get_wall_spawn_rate(self):
+        spawn_rate = 0
+        if self.difficulty == 0:
+            spawn_rate = 0.7
+        elif self.difficulty == 1:
+            spawn_rate = 0.5
+        elif self.difficulty == 2:
+            spawn_rate = 0.25
+        return spawn_rate
+
 
 def draw_text(surf, text, poss, font):
     font_type = py.font.match_font(font[0])
@@ -297,13 +307,22 @@ class Ball(py.sprite.Sprite):
             self.ySpeed = self.speed[1]
 
     def set_xSpeed(self):  # Metodo para invertir la direccion de la bola al rebotar
-        self.xSpeed = -self.xSpeed
+        if self.xSpeed < 0:
+            self.xSpeed = abs(self.xSpeed)
+        else:
+            self.xSpeed = -self.xSpeed
+
+    def top_xSpeed(self):  # Metodo para cambiar la velocidad de la bola
+        if self.xSpeed < 0:
+            self.xSpeed = -50
+        else:
+            self.xSpeed = 50
 
     def increase_xSpeed(self):  # Metodo para aumentar la velocidad progresivamente
         if self.speed_limit > self.xSpeed > 0:
-            self.xSpeed += 1
+            self.xSpeed += 2
         if -self.speed_limit < self.xSpeed < 0:
-            self.xSpeed -= 1
+            self.xSpeed -= 2
 
     def set_speed(self):  # Metodo que ajusta la velocidad de la pelota segun dificultads
         speed_range = [0, 0]
@@ -351,6 +370,21 @@ class Ball(py.sprite.Sprite):
             self.new_ball()
 
 
+# Clase que crea la muros
+# Instancias:
+class Wall(py.sprite.Sprite):
+    def __init__(self, matrix):
+        py.sprite.Sprite.__init__(self)
+        self.matrix = matrix
+        self.width = random.randrange(20, 100, W//40)
+        self.height = random.randrange(20, 100, H//25)
+        self.image = py.Surface((self.width, self.height))
+        self.image.fill(white)
+        self.rect = self.image.get_rect()
+        self.rect.center = random.choice(self.matrix[400:800])
+        self.spawn_rate = 0
+
+
 # Initialize PyGame
 py.init()
 py.mixer.init()
@@ -362,16 +396,18 @@ clock = py.time.Clock()
 sprites = py.sprite.Group()
 players = py.sprite.Group()
 balls = py.sprite.Group()
+walls = py.sprite.Group()
 
 # Inicia la Clase Game
-game = Game(1, 1, 1, 0)
+game = Game(1, 1, 2, 0)
 game.start_game()
 
-# Cargar fondo y sonidos
+# Cargar fondo, sonidos y otros
 back_grounds = game.load_images()[2]
 sound_effects = game.get_sound_effects()
 sound_effects[2].play(loops=-1)
 M = game.get_matrix()
+walls_spawn = game.get_wall_spawn_rate()
 
 # Game loop
 loop = True
@@ -386,7 +422,7 @@ while loop:
     if secs == start_time:
         secs += 1
 
-    # Collisions
+    # Colisiones paleta con bola
     hits = py.sprite.groupcollide(players, balls, False, False)
     if hits:
         sound_effects[0].play()
@@ -403,6 +439,15 @@ while loop:
                     element.set_ySpeed('bottom')
                 element.increase_xSpeed()
                 pallet.increase_xSpeed()
+
+        if random.random() > walls_spawn:
+            wall = Wall(M)
+            sprites.add(wall)
+            walls.add(wall)
+
+    if py.sprite.groupcollide(balls, walls, False, True):
+        for element in balls:
+            element.set_xSpeed()
 
     # Update
     sprites.update()
