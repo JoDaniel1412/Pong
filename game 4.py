@@ -1,5 +1,4 @@
 import pygame as py
-import sys
 import random
 import time
 
@@ -365,7 +364,7 @@ players = py.sprite.Group()
 balls = py.sprite.Group()
 
 # Inicia la Clase Game
-game = Game(1, 1, 1, 1)
+game = Game(1, 1, 1, 0)
 game.start_game()
 
 # Cargar fondo y sonidos
@@ -380,7 +379,6 @@ while loop:
     clock.tick(FPS)
     for event in py.event.get():
         if event.type == py.QUIT or (event.type == py.KEYDOWN and event.key == py.K_ESCAPE):
-            loop = False
             loop = False
 
     # Time
