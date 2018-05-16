@@ -404,6 +404,21 @@ M = game.get_matrix()
 walls_images = game.load_images()[3]
 walls_spawn = game.get_wall_spawn_rate()
 
+
+def show_pause():
+    pause = True
+    while pause:
+        clock.tick(FPS)
+        for event in py.event.get():
+            if event.type == py.QUIT or (event.type == py.KEYDOWN and event.key == py.K_ESCAPE):
+                py.quit()
+            if event.type == py.KEYUP:
+                pause = False
+        draw_text(display, "PAUSA", (W / 2, H / 2), ("Arial", 64, white))
+        draw_text(display, "Presione cualquiere tecla para continuar", (W / 2, H * 3 / 4), ("Arial", 22, white))
+
+        py.display.update()
+
 # Game loop
 loop = True
 while loop:
@@ -411,6 +426,8 @@ while loop:
     for event in py.event.get():
         if event.type == py.QUIT or (event.type == py.KEYDOWN and event.key == py.K_ESCAPE):
             loop = False
+        if event.type == py.KEYUP and event.key == py.K_p:
+            show_pause()
 
     # Time
     start_time = py.time.get_ticks()//1000
