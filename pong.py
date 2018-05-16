@@ -2,8 +2,7 @@ import pygame as py
 import random
 import time
 from tkinter import *
-
-
+from threading import Thread
 
 # Colors
 black = (0, 0, 0)
@@ -14,11 +13,11 @@ blue = (0, 0, 255)
 yellow = (255, 255, 0)
 
 # Variables
-W, H = 1600, 900
+W, H = 1400, 800
 W2, H2 = W//2, H//2
 HW, HH = W / 2, H / 2
 FPS = 60
-secs = 0
+secs = 1
 
 # Initialize PyGame
 py.init()
@@ -191,6 +190,7 @@ class Player(py.sprite.Sprite):
     def __init__(self, keys, difficulty, poss, matrix, status, image, pallets):
         py.sprite.Sprite.__init__(self)
         self.difficulty = difficulty
+        self.poss = poss
         self.pallets = pallets
         size = self.set_pallets_size()
         self.pallet_size = matrix[12][1] - matrix[12-size][1]
@@ -201,7 +201,7 @@ class Player(py.sprite.Sprite):
         self.default_speed = self.speed
         self.image = py.transform.scale(image, (25, self.pallet_size))
         self.rect = self.image.get_rect()
-        self.rect.center = self.matrix[poss]
+        self.rect.center = self.matrix[self.poss]
         self.speed_limit = 40
 
     def pallet_segments(self):  # Metodo que retorna una lista con los segmentos de la paleta
@@ -217,6 +217,9 @@ class Player(py.sprite.Sprite):
         if self.difficulty == 2:
             large = 3
         return large
+
+    def get_pallet_size(self):
+        return self.poss, self.pallet_size
 
     def set_speed(self):  # Metodo que ajusta la velocidad de la paleta segun dificultad
         speed = 0
@@ -312,6 +315,9 @@ class Ball(py.sprite.Sprite):
     def get_ball_yPoss(self):
         return self.rect.y
 
+    def get_ball_center(self):
+        return self.rect.center
+
     def set_ySpeed(self, collision):  # Metodo que hace a la pelota cambiar de direccion en caso de colisionar con la paleta
         if collision == 'top':
             self.ySpeed = self.speed[0]
@@ -401,11 +407,46 @@ class Wall(py.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = random.choice(self.matrix[400:800])
 
-#Parte del menu interfaz
 
-# Variables
-W2, H2 = 800, 600
-game = Game([1,1,1,0])
+# Initialize matrix
+def start_matrix():
+    if running_matrix:
+        main = Tk()
+        main.minsize(320, 870)
+        main.resizable(NO, NO)
+        main.title('Matrix')
+        main.config(bg='black')
+        canvas = Canvas(main, bg='black', width=W2, height=H2)
+        canvas.place(x=5, y=5)
+
+        def draw_matrix():
+            while True:
+                size = []
+                for ball in balls:
+                    size.append(ball.get_ball_center())
+                for pallet in players:
+                    size.append(pallet.get_pallet_size())
+                for n in range(len(M)):
+                    if n == size[0][1]:
+                        square = Label(canvas, text='1', fg='white', bg='red')
+                        square.grid(row=M[n][0], column=M[n][1])
+                    if n == size[1][0] or n == size[2][0]:
+                        square = Label(canvas, text='2', fg='white', bg='green')
+                        square.grid(row=M[n][0], column=M[n][1])
+                    else:
+                        square = Label(canvas, text='0', fg='white', bg='black')
+                        square.grid(row=M[n][0], column=M[n][1])
+
+        matrix = Thread(target=draw_matrix)
+        matrix.start()
+
+        main.mainloop()
+
+# Menu Inicial
+W1, H1 = 800, 600
+game = Game([1, 1, 1, 0])
+
+
 def player1():
     game = Game(1,1,1,0)
 def player2():
@@ -422,8 +463,10 @@ def medio():
     game = Game(1,1,1,0)
 def dificil():
     game = Game(1,1,2,0)
+
+
 main = Tk()
-main.minsize(W2, H2)
+main.minsize(W1, H1)
 main.resizable(NO, NO)
 main.title('Pong')
 Fondo_pong = PhotoImage(file="img/Imagen de menu de pong.gif")
@@ -445,7 +488,7 @@ def load_interface(xPoss, yPoss, xWidth, fgColor, bgColor, fonts):
         ventana2.minsize(W2, H2)
         ventana2.resizable(width=NO, height=NO)
 
-        canvas2 = Canvas(ventana2, width=W2, height=H2, bg="black")
+        canvas2 = Canvas(ventana2, width=W1, height=H1, bg="black")
         canvas2.place(x=-1, y=0)
 
         settings = Label(canvas2, text="Ajustes", font=fonts + str(40), fg=fgColor, bg=bgColor)
@@ -621,9 +664,6 @@ load_interface(0, 0, 10, 'white', 'black', 'Fixedsys ')
 main.mainloop()
 
 
-
-
-
 # Sprite Groups
 sprites = py.sprite.Group()
 players = py.sprite.Group()
@@ -640,6 +680,7 @@ sound_effects[2].play(loops=-1)
 M = game.get_matrix()
 walls_images = game.load_images()[3]
 walls_spawn = game.get_wall_spawn_rate()
+tkinter_matrix = Thread(target=start_matrix)
 
 
 def show_pause():
@@ -658,18 +699,22 @@ def show_pause():
 
 
 # Game loop
+running_matrix = False
 loop = True
 while loop:
     clock.tick(FPS)
     for event in py.event.get():
         if event.type == py.QUIT or (event.type == py.KEYDOWN and event.key == py.K_ESCAPE):
             loop = False
+        if event.type == py.KEYDOWN and event.key == py.K_i and not running_matrix:
+            running_matrix = True
+            tkinter_matrix.start()
         if event.type == py.KEYUP and event.key == py.K_p:
             show_pause()
 
     # Time
-    start_time = py.time.get_ticks()//1000
-    if secs == start_time:
+    time_lapsed = py.time.get_ticks()//1000
+    if secs == time_lapsed:
         secs += 1
 
     # Colisiones paleta con bola
@@ -709,7 +754,5 @@ while loop:
     draw_text(display, str(game.get_scores()[1]), M[652], ('arial', 80, white))
 
     py.display.update()
-
-
 
 py.quit()
