@@ -357,8 +357,13 @@ class Ball(py.sprite.Sprite):
         self.rotate()
         self.rect.x += self.xSpeed
         self.rect.y += self.ySpeed
-        if self.rect.top <= 0 or self.rect.bottom >= H:
+        if self.rect.top <= 0:
             self.ySpeed = -self.ySpeed
+            self.rect.top = 1
+            self.sound_effects[0].play()
+        if self.rect.bottom >= H:
+            self.ySpeed = -self.ySpeed
+            self.rect.bottom = H-1
             self.sound_effects[0].play()
         if self.rect.left < 0:
             self.sound_effects[1].play()
