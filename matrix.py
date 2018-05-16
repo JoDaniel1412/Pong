@@ -5,14 +5,16 @@ from pong import game
 
 # Initialize PyGame
 py.init()
-display = py.display.set_mode((W//2, H//2))
+display = py.display.set_mode((W2, H2))
 clock = py.time.Clock()
 
 
 def draw_matrix():
     M = game.get_matrix()
-    for n in range(H):
-        py.draw.line()
+    for n in range(0, H2, H2//25):
+        py.draw.line(display, white, (0, n), (W2, n))
+    for m in range(0, W2, W2//40):
+        py.draw.line(display, white, (m, 0), (m, H2))
 
 
 # Main loop
@@ -22,6 +24,9 @@ while running:
     for event in py.event.get():
         if event.type == py.QUIT or (event.type == py.KEYDOWN and event.key == py.K_ESCAPE):
             running = False
+
+    # Draw
+    draw_matrix()
 
     py.display.update()
 
