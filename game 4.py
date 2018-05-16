@@ -93,6 +93,7 @@ class Game:
         pallet_images = None
         ball = None
         bg = None
+        wall_image = None
         if self.style == 0:
             white_pallet = py.image.load('img/default_pallet.png').convert_alpha()
             ball = py.Surface((10, 10))
@@ -100,7 +101,9 @@ class Game:
             bg = py.image.load('img/default_bg.png').convert()
             bg = py.transform.scale(bg, (W, H))
             pallet_images = [white_pallet, white_pallet, white_pallet, white_pallet]
+            wall_image = white_pallet
         if self.style == 1:
+            wall_image = py.image.load('img/neon_wall.png').convert_alpha()
             player_red = py.image.load('img/neon_red.png').convert_alpha()
             player_green = py.image.load('img/neon_green.png').convert_alpha()
             player_pink = py.image.load('img/neon_pink.png').convert_alpha()
@@ -110,12 +113,13 @@ class Game:
             bg = py.transform.scale(bg, (W, H))
             pallet_images = [player_red, player_green, player_pink, player_blue]
         if self.style == 2:
+            wall_image = py.image.load('img/baseball_wall.png').convert_alpha()
             player_bat = py.image.load('img/baseball_bat.png').convert_alpha()
             ball = py.image.load('img/baseball_ball.png').convert_alpha()
             pallet_images = [player_bat, player_bat, player_bat, player_bat]
             bg = py.image.load('img/baseball_bg.png').convert()
             bg = py.transform.scale(bg, (W, H))
-        return pallet_images, ball, bg
+        return pallet_images, ball, bg, wall_image
 
     def load_sounds(self):  # Metodo para cargar la musica del juego
         bounce = None
@@ -373,16 +377,14 @@ class Ball(py.sprite.Sprite):
 # Clase que crea la muros
 # Instancias:
 class Wall(py.sprite.Sprite):
-    def __init__(self, matrix):
+    def __init__(self, matrix, image):
         py.sprite.Sprite.__init__(self)
         self.matrix = matrix
         self.width = random.randrange(20, 100, W//40)
         self.height = random.randrange(20, 100, H//25)
-        self.image = py.Surface((self.width, self.height))
-        self.image.fill(white)
+        self.image = py.transform.scale(image, (self.width, self.height))
         self.rect = self.image.get_rect()
         self.rect.center = random.choice(self.matrix[400:800])
-        self.spawn_rate = 0
 
 
 # Initialize PyGame
@@ -399,7 +401,7 @@ balls = py.sprite.Group()
 walls = py.sprite.Group()
 
 # Inicia la Clase Game
-game = Game(1, 1, 2, 0)
+game = Game(1, 1, 2, 2)
 game.start_game()
 
 # Cargar fondo, sonidos y otros
@@ -407,6 +409,7 @@ back_grounds = game.load_images()[2]
 sound_effects = game.get_sound_effects()
 sound_effects[2].play(loops=-1)
 M = game.get_matrix()
+walls_images = game.load_images()[3]
 walls_spawn = game.get_wall_spawn_rate()
 
 # Game loop
@@ -426,6 +429,10 @@ while loop:
     hits = py.sprite.groupcollide(players, balls, False, False)
     if hits:
         sound_effects[0].play()
+        if random.random() > walls_spawn:
+            wall = Wall(M, walls_images)
+            sprites.add(wall)
+            walls.add(wall)
         for element in balls:
             element.set_xSpeed()
             for pallet in hits:
@@ -440,12 +447,8 @@ while loop:
                 element.increase_xSpeed()
                 pallet.increase_xSpeed()
 
-        if random.random() > walls_spawn:
-            wall = Wall(M)
-            sprites.add(wall)
-            walls.add(wall)
-
     if py.sprite.groupcollide(balls, walls, False, True):
+        sound_effects[0].play()
         for element in balls:
             element.set_xSpeed()
 
