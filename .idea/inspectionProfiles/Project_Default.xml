@@ -26,6 +26,7 @@
           <option value="pygame.KEYDOWN" />
           <option value="pygame.K_ESCAPE" />
           <option value="pygame.quit" />
+          <option value="pygame.K_i" />
         </list>
       </option>
     </inspection_tool>

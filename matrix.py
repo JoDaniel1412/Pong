@@ -1,34 +1,28 @@
-import pygame as py
+from tkinter import *
 from settings import *
-from pong import game
+from pong import *
 
-
-# Initialize PyGame
-py.init()
-display = py.display.set_mode((W2, H2))
-clock = py.time.Clock()
+main = Tk()
+main.minsize(320, 870)
+main.resizable(NO, NO)
+main.title('Matrix')
+main.config(bg='black')
+canvas = Canvas(main, bg='black', width=W2, height=H2)
+canvas.place(x=5, y=5)
 
 
 def draw_matrix():
-    M = game.get_matrix()
-    for n in range(0, H2, H2//25):
-        py.draw.line(display, white, (0, n), (W2, n))
-    for m in range(0, W2, W2//40):
-        py.draw.line(display, white, (m, 0), (m, H2))
+    for ball in balls:
+        size = ball.get_ball_center()
+    for n in range(len(M)):
+        if n == size[0]:
+            square = Label(canvas, text='1', fg='white', bg='green')
+            square.grid(row=M[n][0], column=M[n][1])
+        else:
+            square = Label(canvas, text='0', fg='white', bg='black')
+            square.grid(row=M[n][0], column=M[n][1])
 
 
-# Main loop
-running = True
-while running:
-    clock.tick(FPS)
-    for event in py.event.get():
-        if event.type == py.QUIT or (event.type == py.KEYDOWN and event.key == py.K_ESCAPE):
-            running = False
+draw_matrix()
 
-    # Draw
-    draw_matrix()
-
-    py.display.update()
-
-
-py.quit()
+main.mainloop()
