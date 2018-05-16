@@ -14,17 +14,22 @@ yellow = (255, 255, 0)
 
 # Variables
 W, H = 1400, 800
+W1, H1 = 800, 600
 W2, H2 = W//2, H//2
 HW, HH = W / 2, H / 2
 FPS = 60
-secs = 1
+secs = 2
 
-# Initialize PyGame
-py.init()
+# Game Variables
+pallets_selected = 1
+difficulty_selected = 1
+style_selected = 0
+players_selected = 1
+running_matrix = False
+loop = False
+tkinter_loop = True
 py.mixer.init()
-display = py.display.set_mode((W, H))
-py.display.set_caption('Pong')
-clock = py.time.Clock()
+
 
 # Clase usada para iniciar el juego con determinados ajustes
 # Instancias: cantidad de jugadores(1 o 2), cantidad de paletas(1 o 2), difficultad(0, 1 o 2)
@@ -56,6 +61,8 @@ class Game:
         return self.matrix
 
     def start_game(self):  # Metodo para iniciar el juego
+        player1_keys = ('py.K_w', 'py.K_s')
+        player2_keys = ('py.K_UP', 'py.K_DOWN')
         images = self.images[0]
         poss1 = 38
         poss2 = 1026
@@ -65,13 +72,13 @@ class Game:
             if self.pallets == 2:
                 poss1 -= 4
                 poss2 -= 4
-                humane2 = Player(('py.K_w', 'py.K_s'), self.difficulty, poss3, self.matrix, [True, 'HUMANE'], images[1], self.pallets)
+                humane2 = Player(player1_keys, self.difficulty, poss3, self.matrix, [True, 'HUMANE'], images[1], self.pallets)
                 cpu2 = Player('', self.difficulty, poss4, self.matrix, [True, 'CPU'], images[3], self.pallets)
                 sprites.add(humane2)
                 sprites.add(cpu2)
                 players.add(humane2)
                 players.add(cpu2)
-            humane = Player(('py.K_w', 'py.K_s'), self.difficulty, poss1, self.matrix, [True, 'HUMANE'], images[0], self.pallets)
+            humane = Player(player1_keys, self.difficulty, poss1, self.matrix, [True, 'HUMANE'], images[0], self.pallets)
             cpu = Player('', self.difficulty, poss2, self.matrix, [True, 'CPU'], images[2], self.pallets)
             sprites.add(humane)
             sprites.add(cpu)
@@ -82,14 +89,14 @@ class Game:
             if self.pallets == 2:
                 poss1 -= 4
                 poss2 -= 4
-                humane1 = Player(('py.K_w', 'py.K_s'), self.difficulty, poss3, self.matrix, [True, 'HUMANE'], images[1], self.pallets)
-                humane2 = Player(('py.K_UP', 'py.K_DOWN'), self.difficulty, poss4, self.matrix, [True, 'HUMANE'], images[3], self.pallets)
+                humane1 = Player(player1_keys, self.difficulty, poss3, self.matrix, [True, 'HUMANE'], images[1], self.pallets)
+                humane2 = Player(player2_keys, self.difficulty, poss4, self.matrix, [True, 'HUMANE'], images[3], self.pallets)
                 sprites.add(humane1)
                 sprites.add(humane2)
                 players.add(humane1)
                 players.add(humane2)
-            humane1 = Player(('py.K_w', 'py.K_s'), self.difficulty, poss1, self.matrix, [True, 'HUMANE'], images[0], self.pallets)
-            humane2 = Player(('py.K_UP', 'py.K_DOWN'), self.difficulty, poss2, self.matrix, [True, 'HUMANE'], images[2], self.pallets)
+            humane1 = Player(player1_keys, self.difficulty, poss1, self.matrix, [True, 'HUMANE'], images[0], self.pallets)
+            humane2 = Player(player2_keys, self.difficulty, poss2, self.matrix, [True, 'HUMANE'], images[2], self.pallets)
             sprites.add(humane1)
             sprites.add(humane2)
             players.add(humane1)
@@ -175,6 +182,7 @@ class Game:
         return spawn_rate
 
 
+# Funcion para dibujar textos
 def draw_text(surf, text, poss, font):
     font_type = py.font.match_font(font[0])
     make_font = py.font.Font(font_type, font[1])
@@ -411,21 +419,21 @@ class Wall(py.sprite.Sprite):
 # Initialize matrix
 def start_matrix():
     if running_matrix:
-        main = Tk()
-        main.minsize(320, 870)
-        main.resizable(NO, NO)
-        main.title('Matrix')
-        main.config(bg='black')
-        canvas = Canvas(main, bg='black', width=W2, height=H2)
+        main2 = Tk()
+        main2.minsize(320, 870)
+        main2.resizable(NO, NO)
+        main2.title('Matrix')
+        main2.config(bg='black')
+        canvas = Canvas(main2, bg='black', width=W2, height=H2)
         canvas.place(x=5, y=5)
 
         def draw_matrix():
+            size = []
             while True:
-                size = []
                 for ball in balls:
                     size.append(ball.get_ball_center())
-                for pallet in players:
-                    size.append(pallet.get_pallet_size())
+                for each in players:
+                    size.append(each.get_pallet_size())
                 for n in range(len(M)):
                     if n == size[0][1]:
                         square = Label(canvas, text='1', fg='white', bg='red')
@@ -440,319 +448,351 @@ def start_matrix():
         matrix = Thread(target=draw_matrix)
         matrix.start()
 
-        main.mainloop()
+        main2.mainloop()
+
 
 # Menu Inicial
-W1, H1 = 800, 600
-game = Game([1, 1, 1, 0])
+def run_tkinter():
+    if tkinter_loop:
+        main = Tk()
+        main.minsize(W1, H1)
+        main.resizable(NO, NO)
+        main.title('Pong')
+        Fondo_pong = PhotoImage(file="img/Imagen de menu de pong.gif")
+
+        # Funciones de botones
+        def player1():
+            global players_selected
+            global loop
+            players_selected = 1
+            loop = True
+            main.destroy()
+
+        def player2():
+            global players_selected
+            global loop
+            players_selected = 2
+            loop = True
+            main.destroy()
+
+        def easy():
+            global difficulty_selected
+            difficulty_selected = 0
+
+        def medium():
+            global difficulty_selected
+            difficulty_selected = 1
+
+        def hard():
+            global difficulty_selected
+            difficulty_selected = 2
+
+        def default_set():
+            global style_selected
+            style_selected = 0
+
+        def neon_set():
+            global style_selected
+            style_selected = 1
+
+        def baseball_set():
+            global style_selected
+            style_selected = 2
+
+        def pallets_select1():
+            global pallets_selected
+            pallets_selected = 1
+
+        def pallets_select2():
+            global pallets_selected
+            pallets_selected = 2
+
+        # Interface
+        def load_interface(xPoss, yPoss, xWidth, fgColor, bgColor, fonts):
+            # Ventana de ajustes
+            def ajustes():
+                def cerrar_ajustes():
+                    ventana2.destroy()
+                    main.deiconify()
+
+                main.withdraw()
+
+                ventana2 = Toplevel()
+                ventana2.title("Ajustes")
+
+                ventana2.minsize(W1, H1)
+                ventana2.resizable(width=NO, height=NO)
+
+                canvas2 = Canvas(ventana2, width=W1, height=H1, bg="black")
+                canvas2.place(x=-1, y=0)
+
+                settings = Label(canvas2, text="Ajustes", font=fonts + str(40), fg=fgColor, bg=bgColor)
+                settings.place(x=290, y=10)
+
+                dificultad = Label(canvas2, text="Seleccione dificultad", font=fonts + str(20), fg=fgColor, bg=bgColor)
+                dificultad.place(x=230, y=420)
+
+                facil = Button(canvas2, text="Facil", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=easy)
+                facil.place(x=180, y=470)
+
+                medio = Button(canvas2, text="Medio", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=medium)
+                medio.place(x=330, y=470)
+
+                dificil = Button(canvas2, text="Dificil", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=hard)
+                dificil.place(x=480, y=470)
+
+                pallets = Label(canvas2, text="Una paleta:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+                pallets.place(x=500, y=120)
+
+                una_paleta = Button(canvas2, text="1", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=pallets_select1)
+                una_paleta.place(x=690, y=115)
+
+                pallets2 = Label(canvas2, text="Dos paletas:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+                pallets2.place(x=500, y=200)
+
+                dos_paletas = Button(canvas2, text="2", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=pallets_select2)
+                dos_paletas.place(x=710, y=195)
+
+                escenario = Label(canvas2, text="Escoja escenario:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+                escenario.place(x=40, y=120)
+
+                clasico = Button(canvas2, text="Clasico", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=default_set)
+                clasico.place(x=50, y=160)
+
+                neon = Button(canvas2, text="Neon", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=neon_set)
+                neon.place(x=50, y=210)
+
+                futbol = Button(canvas2, text="Futbol", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=baseball_set)
+                futbol.place(x=50, y=260)
+
+                aceptar_ajustes = Button(canvas2, text="LISTO!", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_ajustes)
+                aceptar_ajustes.place(x=670, y=10)
+
+                volver = Button(canvas2, text="VOLVER", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_ajustes)
+                volver.place(x=10, y=10)
+
+            def puntuaciones():
+                def cerrar_puntuciones():
+                    main.deiconify()
+                    ventana_scores.destroy()
+
+                main.withdraw()
+
+                ventana_scores = Toplevel()
+                ventana_scores.title("Ingreso de Jugador")
+
+                ventana_scores.minsize(W2, H2)
+                ventana_scores.resizable(width=NO, height=NO)
+
+                canvas_scores = Canvas(ventana_scores, width=W2, height=H2, bg="black")
+                canvas_scores.place(x=-1, y=0)
+
+                label_scores = Label(canvas_scores, text="Digite nombre de jugador:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+                label_scores.place(x=40, y=120)
+
+                escribir_jugadores = Entry(canvas_scores, width=30)
+                escribir_jugadores.place(x=200, y=300)
+
+                def agregar_scores():
+                    agregar_puntuaciones = open('Scores.txt', 'a')
+                    agregar_puntuaciones.write = (escribir_jugadores.get())
+
+            def mostrar_puntuaciones():
+                def cerrar_mostrar_puntuciones():
+                    main.deiconify()
+                    ventana__mostrar_scores.destroy()
+
+                main.withdraw()
+
+                ventana__mostrar_scores = Toplevel()
+                ventana__mostrar_scores.title("Puntuaciones")
+
+                ventana__mostrar_scores.minsize(W2, H2)
+                ventana__mostrar_scores.resizable(width=NO, height=NO)
+
+                canvas_mostrar_scores = Canvas(ventana__mostrar_scores, width=W2, height=H2, bg="black")
+                canvas_mostrar_scores.place(x=-1, y=0)
+
+                label_mejores = Label(canvas_mostrar_scores, text="Mejores Puntuaciones:", font=fonts + str(20), fg=fgColor,
+                                      bg=bgColor)
+                label_mejores.place(x=200, y=120)
+
+                canvas_tabla = Canvas(canvas_mostrar_scores, width=W2 // 2, height=H2 // 2)
+                canvas_tabla.place(x=200, y=200)
+
+                cerrar_scores = Button(canvas_mostrar_scores, text="BACK!", font=fonts + str(20), fg="black", bg="White",
+                                       borderwidth=0, command=cerrar_mostrar_puntuciones)
+                cerrar_scores.place(x=5, y=0)
+
+                def separarPuntuaciones(i):
+                    if i == len(listaScores):
+                        return
+                    listaScores[i] = listaScores[i].replace("\n", "").split(";")
+                    separarPuntuaciones(i + 1)
+
+                file = open("Scores.txt", 'r')
+                listaScores = file.readlines()
+                separarPuntuaciones(0)
+                file.close()
+
+                def crearTabla(x, y, columns):
+                    global tabla
+                    if x == len(listaScores):
+                        return ''
+                    elif y == 2:
+                        tabla += [columns]
+                        return crearTabla(x + 1, 0, [])
+                    else:
+                        if y == 0:
+                            seccion = Entry(canvas_tabla, text='', width=3, justify=CENTER)
+                            seccion.grid(row=x, column=y)
+                            return crearTabla(x, y + 1, columns + [seccion])
+                        seccion = Entry(canvas_tabla, text='', width=30)
+                        seccion.grid(row=x, column=y)
+                        return crearTabla(x, y + 1, columns + [seccion])
+
+                # Llena la tabla anteriormente creada
+                def llenarTabla(x, y):  # funcion que llena la tabla para vendedores con el vendedores.txt
+                    global tabla
+                    if x == len(listaScores):
+                        return
+                    elif y != 2:
+                        print(listaScores[x][y])
+                        tabla[x][y].insert(0, listaScores[x][y])
+                        return llenarTabla(x, y + 1)
+                    else:
+                        return llenarTabla(x + 1, 0)
+
+                crearTabla(0, 0, [])
+                llenarTabla(0, 0)
+                tabla = []
+
+            mainCanvas = Canvas(main, width=W1, height=H1, bg=bgColor)
+            mainCanvas.place(x=xPoss, y=yPoss)
+
+            tittleLabel = Label(mainCanvas, image=Fondo_pong, borderwidth=0)
+            tittleLabel.place(x=xPoss+5, y=yPoss-50)
+
+            playersButton1 = Button(mainCanvas, text='1 Player', font=fonts+str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command=player1)
+            playersButton1.place(x=xPoss + 290, y=yPoss + 250)
+
+            playersButton2 = Button(mainCanvas, text='2 Player', font=fonts+str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command=player2)
+            playersButton2.place(x=xPoss + 290, y=yPoss + 310)
+
+            playersOption = Button(mainCanvas, text='Options', font=fonts+str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command=ajustes)
+            playersOption.place(x=xPoss + 290, y=yPoss + 370)
+
+            playersHightscore = Button(mainCanvas, text='Scores', font=fonts+str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0)
+            playersHightscore.place(x=xPoss + 290, y=yPoss + 430)
+
+        load_interface(0, 0, 10, 'white', 'black', 'Fixedsys ')
+
+        main.mainloop()
 
 
-def player1():
-    game = Game(1,1,1,0)
-def player2():
-    global game
-    game = Game(2,1,1,0)
-    main.destroy()
-def paletas1():
-    game = Game(1,1,1,0)
-def paletas2():
-    game = Game(1,2,1,0)
-def facil():
-    game = Game(1,1,0,0)
-def medio():
-    game = Game(1,1,1,0)
-def dificil():
-    game = Game(1,1,2,0)
+run_tkinter()
+tkinter_loop = False
+# Initialize PyGame
+if loop:
+    py.init()
+    display = py.display.set_mode((W, H))
+    py.display.set_caption('Pong')
+    clock = py.time.Clock()
+
+    # Sprite Groups
+    sprites = py.sprite.Group()
+    players = py.sprite.Group()
+    balls = py.sprite.Group()
+    walls = py.sprite.Group()
+
+    # Inicia la Clase Game
+    game = Game(players_selected, pallets_selected, difficulty_selected, style_selected)
+    game.start_game()
+
+    # Cargar fondo, sonidos y otros
+    back_grounds = game.load_images()[2]
+    sound_effects = game.get_sound_effects()
+    sound_effects[2].play(loops=-1)
+    M = game.get_matrix()
+    walls_images = game.load_images()[3]
+    walls_spawn = game.get_wall_spawn_rate()
+    tkinter_matrix = Thread(target=start_matrix)
 
 
-main = Tk()
-main.minsize(W1, H1)
-main.resizable(NO, NO)
-main.title('Pong')
-Fondo_pong = PhotoImage(file="img/Imagen de menu de pong.gif")
+    def show_pause():
+        pause = True
+        while pause:
+            clock.tick(FPS)
+            for event in py.event.get():
+                if event.type == py.QUIT or (event.type == py.KEYDOWN and event.key == py.K_ESCAPE):
+                    py.quit()
+                if event.type == py.KEYUP:
+                    pause = False
+            draw_text(display, "PAUSA", (HW, H*3/8), ("Arial", 64, white))
+            draw_text(display, "Presione cualquiere tecla para continuar", (HW, H*5/8), ("Arial", 22, white))
+
+            py.display.update()
 
 
-# Interface
-def load_interface(xPoss, yPoss, xWidth, fgColor, bgColor, fonts):
-    # Ventana de ajustes
-    def ajustes():
-        def cerrar_ajustes():
-            ventana2.destroy()
-            main.deiconify()
-
-        main.withdraw()
-
-        ventana2 = Toplevel()
-        ventana2.title("Ajustes")
-
-        ventana2.minsize(W2, H2)
-        ventana2.resizable(width=NO, height=NO)
-
-        canvas2 = Canvas(ventana2, width=W1, height=H1, bg="black")
-        canvas2.place(x=-1, y=0)
-
-        settings = Label(canvas2, text="Ajustes", font=fonts + str(40), fg=fgColor, bg=bgColor)
-        settings.place(x=290, y=10)
-
-        dificultad = Label(canvas2, text="Seleccione dificultad", font=fonts + str(20), fg=fgColor, bg=bgColor)
-        dificultad.place(x=230, y=420)
-
-        facil = Button(canvas2, text="Facil", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0)
-        facil.place(x=180, y=470)
-
-        medio = Button(canvas2, text="Medio", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0)
-        medio.place(x=330, y=470)
-
-        dificil = Button(canvas2, text="Dificil", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0)
-        dificil.place(x=480, y=470)
-
-        musica = Label(canvas2, text="Musica:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-        musica.place(x=500, y=120)
-
-        musica_on = Button(canvas2, text="On", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0)
-        musica_on.place(x=630, y=115)
-
-        musica_off = Button(canvas2, text="Off", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0)
-        musica_off.place(x=690, y=115)
-
-        sonido = Label(canvas2, text="Sonido:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-        sonido.place(x=500, y=200)
-
-        sonido_on = Button(canvas2, text="On", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0)
-        sonido_on.place(x=630, y=195)
-
-        sonido_off = Button(canvas2, text="Off", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0)
-        sonido_off.place(x=690, y=195)
-
-        escenario = Label(canvas2, text="Escoja escenario:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-        escenario.place(x=40, y=120)
-
-        clasico = Button(canvas2, text="Clasico", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0)
-        clasico.place(x=50, y=160)
-
-        neon = Button(canvas2, text="Neon", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0)
-        neon.place(x=50, y=210)
-
-        futbol = Button(canvas2, text="Futbol", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0)
-        futbol.place(x=50, y=260)
-
-        aceptar_ajustes = Button(canvas2, text="LISTO!", font=fonts + str(20), fg="black", bg="White", borderwidth=0)
-        aceptar_ajustes.place(x=670, y=10)
-
-        volver = Button(canvas2, text="VOLVER", font=fonts + str(20), fg="black", bg="White", borderwidth=0,
-                        command=cerrar_ajustes)
-        volver.place(x=10, y=10)
-
-    def puntuaciones():
-        def cerrar_puntuciones():
-            main.deiconify()
-            ventana_scores.destroy()
-
-        main.withdraw()
-
-        ventana_scores = Toplevel()
-        ventana_scores.title("Ingreso de Jugador")
-
-        ventana_scores.minsize(W2, H2)
-        ventana_scores.resizable(width=NO, height=NO)
-
-        canvas_scores = Canvas(ventana_scores, width=W2, height=H2, bg="black")
-        canvas_scores.place(x=-1, y=0)
-
-        label_scores = Label(canvas_scores, text="Digite nombre de jugador:", font=fonts + str(20), fg=fgColor,
-                             bg=bgColor)
-        label_scores.place(x=40, y=120)
-
-        escribir_jugadores = Entry(canvas_scores, width=30)
-        escribir_jugadores.place(x=200, y=300)
-
-        def agregar_scores():
-            agregar_puntuaciones = open('Scores.txt', 'a')
-            agregar_puntuaciones.write = (escribir_jugadores.get())
-
-    def mostrar_puntuaciones():
-        def cerrar_mostrar_puntuciones():
-            main.deiconify()
-            ventana__mostrar_scores.destroy()
-
-        main.withdraw()
-
-        ventana__mostrar_scores = Toplevel()
-        ventana__mostrar_scores.title("Puntuaciones")
-
-        ventana__mostrar_scores.minsize(W2, H2)
-        ventana__mostrar_scores.resizable(width=NO, height=NO)
-
-        canvas_mostrar_scores = Canvas(ventana__mostrar_scores, width=W2, height=H2, bg="black")
-        canvas_mostrar_scores.place(x=-1, y=0)
-
-        label_mejores = Label(canvas_mostrar_scores, text="Mejores Puntuaciones:", font=fonts + str(20), fg=fgColor,
-                              bg=bgColor)
-        label_mejores.place(x=200, y=120)
-
-        canvas_tabla = Canvas(canvas_mostrar_scores, width=W2 // 2, height=H2 // 2)
-        canvas_tabla.place(x=200, y=200)
-
-        cerrar_scores = Button(canvas_mostrar_scores, text="BACK!", font=fonts + str(20), fg="black", bg="White",
-                               borderwidth=0, command=cerrar_mostrar_puntuciones)
-        cerrar_scores.place(x=5, y=0)
-
-        def separarPuntuaciones(i):
-            if i == len(listaScores):
-                return
-            listaScores[i] = listaScores[i].replace("\n", "").split(";")
-            separarPuntuaciones(i + 1)
-
-        file = open("Scores.txt", 'r')
-        listaScores = file.readlines()
-        separarPuntuaciones(0)
-        file.close()
-
-        def crearTabla(x, y, columns):
-            global tabla
-            if x == len(listaScores):
-                return ''
-            elif y == 2:
-                tabla += [columns]
-                return crearTabla(x + 1, 0, [])
-            else:
-                if y == 0:
-                    seccion = Entry(canvas_tabla, text='', width=3, justify=CENTER)
-                    seccion.grid(row=x, column=y)
-                    return crearTabla(x, y + 1, columns + [seccion])
-                seccion = Entry(canvas_tabla, text='', width=30)
-                seccion.grid(row=x, column=y)
-                return crearTabla(x, y + 1, columns + [seccion])
-
-        # Llena la tabla anteriormente creada
-        def llenarTabla(x, y):  # funcion que llena la tabla para vendedores con el vendedores.txt
-            global tabla
-            if x == len(listaScores):
-                return
-            elif y != 2:
-                print(listaScores[x][y])
-                tabla[x][y].insert(0, listaScores[x][y])
-                return llenarTabla(x, y + 1)
-            else:
-                return llenarTabla(x + 1, 0)
-
-        crearTabla(0, 0, [])
-        llenarTabla(0, 0)
-        tabla = []
-
-    mainCanvas = Canvas(main, width=W2, height=H2, bg=bgColor)
-    mainCanvas.place(x=xPoss, y=yPoss)
-
-    tittleLabel = Label(mainCanvas, image=Fondo_pong, borderwidth=0)
-    tittleLabel.place(x=xPoss+5, y=yPoss-50)
-
-    playersButton1 = Button(mainCanvas, text='1 Player', font=fonts +str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command=player1)
-    playersButton1.place(x=xPoss + 290, y=yPoss + 250)
-
-    playersButton2 = Button(mainCanvas, text='2 Player', font=fonts + str(30), fg=fgColor, bg=bgColor, width=xWidth,justify=RIGHT, borderwidth=0, command=player2)
-    playersButton2.place(x=xPoss + 290, y=yPoss + 310)
-
-    playersOption = Button(mainCanvas, text='Options', font=fonts + str(30), fg=fgColor, bg=bgColor, width=xWidth,justify=RIGHT, borderwidth=0, command=ajustes)
-    playersOption.place(x=xPoss + 290, y=yPoss + 370)
-
-    playersHightscore = Button(mainCanvas, text='Scores', font=fonts + str(30), fg=fgColor, bg=bgColor, width=xWidth,justify=RIGHT, borderwidth=0)
-    playersHightscore.place(x=xPoss + 290, y=yPoss + 430)
-
-
-load_interface(0, 0, 10, 'white', 'black', 'Fixedsys ')
-
-main.mainloop()
-
-
-# Sprite Groups
-sprites = py.sprite.Group()
-players = py.sprite.Group()
-balls = py.sprite.Group()
-walls = py.sprite.Group()
-
-# Inicia la Clase Game
-game.start_game()
-
-# Cargar fondo, sonidos y otros
-back_grounds = game.load_images()[2]
-sound_effects = game.get_sound_effects()
-sound_effects[2].play(loops=-1)
-M = game.get_matrix()
-walls_images = game.load_images()[3]
-walls_spawn = game.get_wall_spawn_rate()
-tkinter_matrix = Thread(target=start_matrix)
-
-
-def show_pause():
-    pause = True
-    while pause:
+    # Game loop
+    while loop:
         clock.tick(FPS)
         for event in py.event.get():
-            if event.type == py.QUIT or (event.type == py.KEYDOWN and event.key == py.K_ESCAPE):
-                py.quit()
-            if event.type == py.KEYUP:
-                pause = False
-        draw_text(display, "PAUSA", (W / 2, H / 2), ("Arial", 64, white))
-        draw_text(display, "Presione cualquiere tecla para continuar", (W / 2, H * 3 / 4), ("Arial", 22, white))
+            if event.type == py.QUIT:
+                loop = False
+                tkinter_loop = False
+            if event.type == py.KEYDOWN and event.key == py.K_ESCAPE:
+                loop = False
+                tkinter_loop = True
+            if event.type == py.KEYDOWN and event.key == py.K_i and not running_matrix:
+                running_matrix = True
+                tkinter_matrix.start()
+            if event.type == py.KEYUP and event.key == py.K_p:
+                show_pause()
+
+        # Time
+        time_lapsed = py.time.get_ticks()//1000
+        if secs == time_lapsed:
+            secs += 1
+
+        # Colisiones paleta con bola
+        hits = py.sprite.groupcollide(players, balls, False, False)
+        if hits:
+            sound_effects[0].play()
+            if random.random() > walls_spawn:
+                wall = Wall(M, walls_images)
+                sprites.add(wall)
+                walls.add(wall)
+            for element in balls:
+                element.set_xSpeed()
+                for pallet in hits:
+                    ball_poss = element.get_ball_poss()[1]
+                    pallet_segment = pallet.pallet_segments()
+                    if pallet_segment[0] <= ball_poss < pallet_segment[1]:  # Revisa si la bola choca en la parte superior
+                        element.set_ySpeed('top')
+                    if pallet_segment[1] <= ball_poss <= pallet_segment[2]:  # Revisa si la bola choca en la parte central
+                        element.set_ySpeed('center')
+                    if pallet_segment[2] < ball_poss <= pallet_segment[3]:  # Revisa si la bola choca en la parte inferior
+                        element.set_ySpeed('bottom')
+                    element.increase_xSpeed()
+                    pallet.increase_xSpeed()
+
+        if py.sprite.groupcollide(balls, walls, False, True):
+            sound_effects[0].play()
+            for element in balls:
+                element.set_xSpeed()
+
+        # Update
+        sprites.update()
+
+        # Draw
+        display.blit(back_grounds, (0, 0))
+        sprites.draw(display)
+        draw_text(display, str(game.get_scores()[0]), M[366], ('arial', 80, white))
+        draw_text(display, str(game.get_scores()[1]), M[652], ('arial', 80, white))
 
         py.display.update()
 
-
-# Game loop
-running_matrix = False
-loop = True
-while loop:
-    clock.tick(FPS)
-    for event in py.event.get():
-        if event.type == py.QUIT or (event.type == py.KEYDOWN and event.key == py.K_ESCAPE):
-            loop = False
-        if event.type == py.KEYDOWN and event.key == py.K_i and not running_matrix:
-            running_matrix = True
-            tkinter_matrix.start()
-        if event.type == py.KEYUP and event.key == py.K_p:
-            show_pause()
-
-    # Time
-    time_lapsed = py.time.get_ticks()//1000
-    if secs == time_lapsed:
-        secs += 1
-
-    # Colisiones paleta con bola
-    hits = py.sprite.groupcollide(players, balls, False, False)
-    if hits:
-        sound_effects[0].play()
-        if random.random() > walls_spawn:
-            wall = Wall(M, walls_images)
-            sprites.add(wall)
-            walls.add(wall)
-        for element in balls:
-            element.set_xSpeed()
-            for pallet in hits:
-                ball_poss = element.get_ball_poss()[1]
-                pallet_segment = pallet.pallet_segments()
-                if pallet_segment[0] <= ball_poss < pallet_segment[1]:  # Revisa si la bola choca en la parte superior
-                    element.set_ySpeed('top')
-                if pallet_segment[1] <= ball_poss <= pallet_segment[2]:  # Revisa si la bola choca en la parte central
-                    element.set_ySpeed('center')
-                if pallet_segment[2] < ball_poss <= pallet_segment[3]:  # Revisa si la bola choca en la parte inferior
-                    element.set_ySpeed('bottom')
-                element.increase_xSpeed()
-                pallet.increase_xSpeed()
-
-    if py.sprite.groupcollide(balls, walls, False, True):
-        sound_effects[0].play()
-        for element in balls:
-            element.set_xSpeed()
-
-    # Update
-    sprites.update()
-
-    # Draw
-    display.blit(back_grounds, (0, 0))
-    sprites.draw(display)
-    draw_text(display, str(game.get_scores()[0]), M[366], ('arial', 80, white))
-    draw_text(display, str(game.get_scores()[1]), M[652], ('arial', 80, white))
-
-    py.display.update()
-
 py.quit()
+if tkinter_loop:
+    run_tkinter()
