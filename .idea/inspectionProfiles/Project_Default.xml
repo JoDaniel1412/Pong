@@ -29,6 +29,7 @@
           <option value="pygame.K_i" />
           <option value="pygame.KEYUP" />
           <option value="pygame.K_p" />
+          <option value="pygame.K_m" />
         </list>
       </option>
     </inspection_tool>
