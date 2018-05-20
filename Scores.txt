@@ -8,3 +8,5 @@ prueba 3;su tiempo es 3 segundos
 166;su tiempo es 33.07829689979553 segundos
 12;su tiempo es 24.243603467941284 segundos
 12;su tiempo es 67.67840909957886 segundos
+hola;su tiempo es 26 segundos
+pene;su tiempo es 29 segundos

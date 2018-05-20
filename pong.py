@@ -138,7 +138,7 @@ class Game:
             player_pink = py.image.load('img/neon_pink.png').convert_alpha()
             player_blue = py.image.load('img/neon_blue.png').convert_alpha()
             ball = py.image.load('img/neon_ball.png').convert_alpha()
-            bg = py.image.load('img/neon_bg.png').convert()
+            bg = py.image.load('img/neon_bg.jpg').convert()
             bg = py.transform.scale(bg, (W, H))
             pallet_images = [player_red, player_green, player_pink, player_blue]
         if self.style == 2:  # Estilo Baseball
@@ -156,15 +156,15 @@ class Game:
         score = None
         music = None
         if self.style == 0:
-            bounce = py.mixer.Sound('sound/default_bounce.wav')
-            score = py.mixer.Sound('sound/default_score.wav')
+            bounce = py.mixer.Sound('sound/default_bounce.ogg')
+            score = py.mixer.Sound('sound/default_score.ogg')
             music = py.mixer.Sound('sound/default_music.ogg')
         if self.style == 1:
-            bounce = py.mixer.Sound('sound/neon_bounce.wav')
-            score = py.mixer.Sound('sound/neon_score.wav')
-            music = py.mixer.Sound('sound/neon_music.ogg')
+            bounce = py.mixer.Sound('sound/neon_bounce.ogg')
+            score = py.mixer.Sound('sound/neon_score.ogg')
+            music = py.mixer.Sound('sound/default_music.ogg')
         if self.style == 2:
-            bounce = py.mixer.Sound('sound/baseball_bounce.wav')
+            bounce = py.mixer.Sound('sound/baseball_bounce.ogg')
             score = py.mixer.Sound('sound/baseball_score.ogg')
             music = py.mixer.Sound('sound/baseball_music.ogg')
         return bounce, score, music
