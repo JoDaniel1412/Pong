@@ -515,7 +515,7 @@ def matrix_loop(M):
     def draw_matrix():
         size = []
         for ball in balls:
-            size.append(ball.get_ball_center())
+            size.append(ball.get_ball_poss())
         for each in players:
             size.append(each.get_pallet_size())
         for wall in walls:
