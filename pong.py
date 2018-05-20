@@ -389,10 +389,6 @@ class Ball(py.sprite.Sprite):
     def get_ball_yPoss(self):
         return self.rect.y
 
-    # Metodo que obtiene el centro de la bola
-    def get_ball_center(self):
-        return self.rect.center
-
     # Metodo que hace a la pelota cambiar de direccion en caso de colisionar con la paleta
     def set_ySpeed(self, collision):
         if collision == 'top':
