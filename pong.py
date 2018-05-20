@@ -55,7 +55,8 @@ class Game:
         self.score1 = 0
         self.score2 = 0
 
-    def make_matrix(self):  # Metodo para generar matriz
+    # Metodo para generar matriz
+    def make_matrix(self):
         n, m = 25, 40
         i, j = 0, 0
         x, y = W // m, H // n
@@ -66,10 +67,12 @@ class Game:
             i += x
             j = 0
 
-    def get_matrix(self):  # Metodo para obtener la matriz
+    # Metodo para obtener la matriz
+    def get_matrix(self):
         return self.matrix
 
-    def start_game(self):  # Metodo para iniciar el juego
+    # Metodo para iniciar el juego
+    def start_game(self):
         player1_keys = ('py.K_w', 'py.K_s')
         player2_keys = ('py.K_UP', 'py.K_DOWN')
         images = self.images[0]
@@ -77,7 +80,7 @@ class Game:
         poss2 = 1026
         poss3 = poss1 + 7
         poss4 = poss2 + 5
-        if self.players == 1:
+        if self.players == 1:  # En caso de ser un jugador
             if self.pallets == 2:
                 poss1 -= 4
                 poss2 -= 4
@@ -94,7 +97,7 @@ class Game:
             players.add(humane)
             players.add(cpu)
 
-        if self.players == 2:
+        if self.players == 2:  # En caso de ser dos jugadores
             if self.pallets == 2:
                 poss1 -= 4
                 poss2 -= 4
@@ -119,7 +122,7 @@ class Game:
         ball = None
         bg = None
         wall_image = None
-        if self.style == 0:
+        if self.style == 0:  # Estilo Clasico
             white_pallet = py.image.load('img/default_pallet.png').convert_alpha()
             ball = py.Surface((10, 10))
             ball.fill(white)
@@ -127,7 +130,7 @@ class Game:
             bg = py.transform.scale(bg, (W, H))
             pallet_images = [white_pallet, white_pallet, white_pallet, white_pallet]
             wall_image = white_pallet
-        if self.style == 1:
+        if self.style == 1:  # Estilo Neon
             wall_image = py.image.load('img/neon_wall.png').convert_alpha()
             player_red = py.image.load('img/neon_red.png').convert_alpha()
             player_green = py.image.load('img/neon_green.png').convert_alpha()
@@ -137,7 +140,7 @@ class Game:
             bg = py.image.load('img/neon_bg.png').convert()
             bg = py.transform.scale(bg, (W, H))
             pallet_images = [player_red, player_green, player_pink, player_blue]
-        if self.style == 2:
+        if self.style == 2:  # Estilo Baseball
             wall_image = py.image.load('img/baseball_wall.png').convert_alpha()
             player_bat = py.image.load('img/baseball_bat.png').convert_alpha()
             ball = py.image.load('img/baseball_ball.png').convert_alpha()
@@ -146,7 +149,8 @@ class Game:
             bg = py.transform.scale(bg, (W, H))
         return pallet_images, ball, bg, wall_image
 
-    def load_sounds(self):  # Metodo para cargar la musica del juego
+    # Metodo para cargar la musica del juego
+    def load_sounds(self):
         bounce = None
         score = None
         music = None
@@ -164,23 +168,28 @@ class Game:
             music = py.mixer.Sound('sound/baseball_music.ogg')
         return bounce, score, music
 
-    def get_sound_effects(self):  # Metodo para obtener los sonidos del juego
+    # Metodo para obtener los sonidos del juego
+    def get_sound_effects(self):
         return self.sound_effects
 
-    def add_score1(self):  # Metodo que ajusta el puntaje del jugador 1
+    # Metodo que ajusta el puntaje del jugador 1
+    def add_score1(self):
         self.score1 += 1
         for pallets in players:
             pallets.reset_speed()
 
-    def add_score2(self):  # Metodo que ajusta el puntaje del jugador 2
+    # Metodo que ajusta el puntaje del jugador 2
+    def add_score2(self):
         self.score2 += 1
         for pallets in players:
             pallets.reset_speed()
 
-    def get_scores(self):  # Metodo para obtener los puntajes
+    # Metodo para obtener los puntajes
+    def get_scores(self):
         return self.score1, self.score2
 
-    def get_wall_spawn_rate(self):  # Metodo para ajustar la frecuencia de muros
+    # Metodo para ajustar la frecuencia de muros
+    def get_wall_spawn_rate(self):
         spawn_rate = 0
         if self.difficulty == 0:
             spawn_rate = 0.7
@@ -222,11 +231,13 @@ class Player(py.sprite.Sprite):
         self.rect.center = self.matrix[self.poss]
         self.speed_limit = 40
 
-    def pallet_segments(self):  # Metodo que retorna una lista con los segmentos de la paleta
+    # Metodo que retorna una lista con los segmentos de la paleta
+    def pallet_segments(self):
         segment = self.pallet_size / 3
         return [self.rect.top] + [self.rect.top+segment] + [self.rect.bottom-segment] + [self.rect.bottom]
 
-    def set_pallets_size(self):  # Metodo que ajusta el largo de la paleta segun dificultad
+    # Metodo que ajusta el largo de la paleta segun dificultad
+    def set_pallets_size(self):
         large = 0
         if self.difficulty == 0:
             large = 9
@@ -236,10 +247,12 @@ class Player(py.sprite.Sprite):
             large = 3
         return large
 
-    def get_pallet_size(self):  # Metodo que obtiene las dimensiones de la paleta
+    # Metodo que obtiene las dimensiones de la paleta
+    def get_pallet_size(self):
         return self.rect.center, self.pallet_size
 
-    def set_speed(self):  # Metodo que ajusta la velocidad de la paleta segun dificultad
+    # Metodo que ajusta la velocidad de la paleta segun dificultad
+    def set_speed(self):
         speed = 0
         if self.difficulty == 0:
             speed = 7
@@ -249,19 +262,23 @@ class Player(py.sprite.Sprite):
             speed = 15
         return speed
 
-    def increase_xSpeed(self):  # Metodo para aumentar la velocidad progresivamente
+    # Metodo para aumentar la velocidad progresivamente
+    def increase_xSpeed(self):
         if self.speed_limit > self.speed > 0:
             self.speed += 1
         if -self.speed_limit < self.speed < 0:
             self.speed -= 1
 
+    # Metodo par reiniciar la velocidad
     def reset_speed(self):
         self.speed = self.default_speed
 
+    # Metodo para obtener el estado de la paleta
     def set_status(self, boolean):
         self.status[0] = boolean
 
-    def update(self):  # Metodo que actualiza la posicion de la paleta en la pantalla
+    # Metodo que actualiza la posicion de la paleta en la pantalla
+    def update(self):
         global tiempo_funcion
         k = py.key.get_pressed()
 
@@ -324,7 +341,6 @@ class Player(py.sprite.Sprite):
             if self.status[0] and self.status[1] == 'CPU':  # Ajusta movimiento del cpu y dificultad
                 tiempo3 = time.time()
                 diferencia = int(tiempo3 - tiempo_funcion)
-                print(diferencia)
                 for ball in balls:
                     y = ball.get_ball_yPoss()
                     if self.difficulty == 2:
@@ -359,20 +375,25 @@ class Ball(py.sprite.Sprite):
         self.rotation_speed = 7
         self.last_rotation = 0
 
-    def rotate(self):  # Metodo para rotar la imagen de la bola
+    # Metodo para rotar la imagen de la bola
+    def rotate(self):
         self.last_rotation += self.rotation_speed
         self.image = py.transform.rotate(self.original_image, self.last_rotation)
 
-    def get_ball_poss(self):  # Metodo para obtener la posicion de la bola
+    # Metodo para obtener la posicion de la bola
+    def get_ball_poss(self):
         return self.rect.center
 
-    def get_ball_yPoss(self):  # Metodo que obtiene la posicion en Y de la bola
+    # Metodo que obtiene la posicion en Y de la bola
+    def get_ball_yPoss(self):
         return self.rect.y
 
-    def get_ball_center(self):  # Metodo que obtiene el centro de la bola
+    # Metodo que obtiene el centro de la bola
+    def get_ball_center(self):
         return self.rect.center
 
-    def set_ySpeed(self, collision):  # Metodo que hace a la pelota cambiar de direccion en caso de colisionar con la paleta
+    # Metodo que hace a la pelota cambiar de direccion en caso de colisionar con la paleta
+    def set_ySpeed(self, collision):
         if collision == 'top':
             self.ySpeed = self.speed[0]
         if collision == 'center':
@@ -380,25 +401,29 @@ class Ball(py.sprite.Sprite):
         if collision == 'bottom':
             self.ySpeed = self.speed[1]
 
-    def set_xSpeed(self):  # Metodo para invertir la direccion de la bola al rebotar
+    # Metodo para invertir la direccion de la bola al rebotar
+    def set_xSpeed(self):
         if self.xSpeed < 0:
             self.xSpeed = abs(self.xSpeed)
         else:
             self.xSpeed = -self.xSpeed
 
-    def top_xSpeed(self):  # Metodo para cambiar la velocidad de la bola
+    # Metodo para cambiar la velocidad de la bola
+    def top_xSpeed(self):
         if self.xSpeed < 0:
             self.xSpeed = -50
         else:
             self.xSpeed = 50
 
-    def increase_xSpeed(self):  # Metodo para aumentar la velocidad progresivamente
+    # Metodo para aumentar la velocidad progresivamente
+    def increase_xSpeed(self):
         if self.speed_limit > self.xSpeed > 0:
             self.xSpeed += 2
         if -self.speed_limit < self.xSpeed < 0:
             self.xSpeed -= 2
 
-    def set_speed(self):  # Metodo que ajusta la velocidad de la pelota segun dificultads
+    # Metodo que ajusta la velocidad de la pelota segun dificultads
+    def set_speed(self):
         speed_range = [0, 0]
         if self.difficulty == 0:
             speed_range = [-6, 6]
@@ -408,7 +433,8 @@ class Ball(py.sprite.Sprite):
             speed_range = [-10, 10]
         return speed_range
 
-    def set_size(self):  # Metodo que ajusta el radio de la bola segun dificultad
+    # Metodo que ajusta el radio de la bola segun dificultad
+    def set_size(self):
         ball_size = 0
         if self.difficulty == 0:
             ball_size = 55
@@ -418,12 +444,14 @@ class Ball(py.sprite.Sprite):
             ball_size = 25
         return ball_size
 
-    def new_ball(self):  # Metodo que crea una bola cada vez que se anota un punto
+    # Metodo que crea una bola cada vez que se anota un punto
+    def new_ball(self):
         newBall = Ball(self.difficulty, self.original_image, self.game)
         sprites.add(newBall)
         balls.add(newBall)
 
-    def update(self):  # Metodo que actualiza la posicion de la pelota en la pantalla
+    # Metodo que actualiza la posicion de la pelota en la pantalla
+    def update(self):
         self.rotate()
         self.rect.x += self.xSpeed
         self.rect.y += self.ySpeed
@@ -451,7 +479,7 @@ class Ball(py.sprite.Sprite):
 
 # Clase que crea la muros
 # Instancias: la matriz, imagenes
-# Metodos: ninguno
+# Metodos: obtener la posicion del muro
 class Wall(py.sprite.Sprite):
     def __init__(self, matrix, image):
         py.sprite.Sprite.__init__(self)
@@ -461,6 +489,9 @@ class Wall(py.sprite.Sprite):
         self.image = py.transform.scale(image, (self.width, self.height))
         self.rect = self.image.get_rect()
         self.rect.center = random.choice(self.matrix[400:800])
+
+    def get_center(self):
+        return self.rect.center
 
 
 # Inicia ventana de matriz
@@ -473,6 +504,7 @@ def matrix_loop(M):
     canvas = Canvas(main2, bg='black', width=W2, height=H2)
     canvas.place(x=5, y=5)
 
+    # Funcion que dibuja una matrix en grids
     def draw_matrix():
         size = []
         while True:
@@ -484,7 +516,7 @@ def matrix_loop(M):
                 if n == size[0][1]:
                     square = Label(canvas, text='1', fg='white', bg='red')
                     square.grid(row=M[n][0], column=M[n][1])
-                if n == size[1][0] or n == size[2][0]:
+                elif n == size[1][0] or n == size[2][0]:
                     square = Label(canvas, text='2', fg='white', bg='green')
                     square.grid(row=M[n][0], column=M[n][1])
                 else:
@@ -505,7 +537,7 @@ def menu_loop():
     main.title('Pong')
     Fondo_pong = PhotoImage(file="img/Imagen de menu de pong.gif")
 
-    # Funciones de botones
+    # Inicia el juego en modo un jugador vs cpu
     def player1():
         global players_selected
         global run_game
@@ -513,6 +545,7 @@ def menu_loop():
         run_game = True
         main.destroy()
 
+    # Inicia el juego en modo dos jugadores
     def player2():
         global players_selected
         global run_game
@@ -520,45 +553,75 @@ def menu_loop():
         run_game = True
         main.destroy()
 
-    def easy():
-        global difficulty_selected
-        difficulty_selected = 0
-
-    def medium():
-        global difficulty_selected
-        difficulty_selected = 1
-
-    def hard():
-        global difficulty_selected
-        difficulty_selected = 2
-
-    def default_set():
-        global style_selected
-        style_selected = 0
-
-    def neon_set():
-        global style_selected
-        style_selected = 1
-
-    def baseball_set():
-        global style_selected
-        style_selected = 2
-
-    def pallets_select1():
-        global pallets_selected
-        pallets_selected = 1
-
-    def pallets_select2():
-        global pallets_selected
-        pallets_selected = 2
-
     # Funcion que inicia la interfaz del menu
     def load_interface(xPoss, yPoss, xWidth, fgColor, bgColor, fonts):
-        # Ventana de ajustes
+        # Funcion que abre la ventana de ajustes
         def ajustes():
-            def cerrar_ajustes():
+            def cerrar_ajustes():  # Funcion que cierra la ventana ajustes
                 ventana2.destroy()
                 main.deiconify()
+
+            # Configura la dificultas a facil
+            def easy():
+                global difficulty_selected
+                difficulty_selected = 0
+                facil['bg'], facil['fg'] = fgColor, bgColor
+                medio['bg'], medio['fg'] = bgColor, fgColor
+                dificil['bg'], dificil['fg'] = bgColor, fgColor
+
+            # Configura la dificultas a medio
+            def medium():
+                global difficulty_selected
+                difficulty_selected = 1
+                facil['bg'], facil['fg'] = bgColor, fgColor
+                medio['bg'], medio['fg'] = fgColor, bgColor
+                dificil['bg'], dificil['fg'] = bgColor, fgColor
+
+            # Configura la dificultas a dificil
+            def hard():
+                global difficulty_selected
+                difficulty_selected = 2
+                facil['bg'], facil['fg'] = bgColor, fgColor
+                medio['bg'], medio['fg'] = bgColor, fgColor
+                dificil['bg'], dificil['fg'] = fgColor, bgColor
+
+            # Configura el estilo a clasico
+            def default_set():
+                global style_selected
+                style_selected = 0
+                clasico['bg'], clasico['fg'] = fgColor, bgColor
+                neon['bg'], neon['fg'] = bgColor, fgColor
+                futbol['bg'], futbol['fg'] = bgColor, fgColor
+
+            # Configura el estilo a neon
+            def neon_set():
+                global style_selected
+                style_selected = 1
+                clasico['bg'], clasico['fg'] = bgColor, fgColor
+                neon['bg'], neon['fg'] = fgColor, bgColor
+                futbol['bg'], futbol['fg'] = bgColor, fgColor
+
+            # Configura el estilo a baseball
+            def baseball_set():
+                global style_selected
+                style_selected = 2
+                clasico['bg'], clasico['fg'] = bgColor, fgColor
+                neon['bg'], neon['fg'] = bgColor, fgColor
+                futbol['bg'], futbol['fg'] = fgColor, bgColor
+
+            # Configura el modo a una paleta
+            def pallets_select1():
+                global pallets_selected
+                pallets_selected = 1
+                una_paleta['bg'], una_paleta['fg'] = fgColor, bgColor
+                dos_paletas['bg'], dos_paletas['fg'] = bgColor, fgColor
+
+            # Configura el modo a dos paletas
+            def pallets_select2():
+                global pallets_selected
+                pallets_selected = 2
+                una_paleta['bg'], una_paleta['fg'] = bgColor, fgColor
+                dos_paletas['bg'], dos_paletas['fg'] = fgColor, bgColor
 
             main.withdraw()
 
@@ -574,7 +637,7 @@ def menu_loop():
             settings = Label(canvas2, text="Ajustes", font=fonts + str(40), fg=fgColor, bg=bgColor)
             settings.place(x=290, y=10)
 
-            dificultad = Label(canvas2, text="Seleccione dificultad", font=fonts + str(20), fg=fgColor, bg=bgColor)
+            dificultad = Label(canvas2, text="Seleccione dificultad:", font=fonts + str(20), fg=fgColor, bg=bgColor)
             dificultad.place(x=230, y=420)
 
             facil = Button(canvas2, text="Facil", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=easy)
@@ -586,17 +649,14 @@ def menu_loop():
             dificil = Button(canvas2, text="Dificil", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=hard)
             dificil.place(x=480, y=470)
 
-            pallets = Label(canvas2, text="Una paleta:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            pallets.place(x=500, y=120)
+            paletas = Label(canvas2, text="Seleccione paletas:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+            paletas.place(x=460, y=120)
 
-            una_paleta = Button(canvas2, text="1", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=pallets_select1)
-            una_paleta.place(x=690, y=115)
+            una_paleta = Button(canvas2, text="Una paleta", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=pallets_select1)
+            una_paleta.place(x=500, y=180)
 
-            pallets2 = Label(canvas2, text="Dos paletas:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            pallets2.place(x=500, y=200)
-
-            dos_paletas = Button(canvas2, text="2", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=pallets_select2)
-            dos_paletas.place(x=710, y=195)
+            dos_paletas = Button(canvas2, text="Dos paletas", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=pallets_select2)
+            dos_paletas.place(x=500, y=240)
 
             escenario = Label(canvas2, text="Escoja escenario:", font=fonts + str(20), fg=fgColor, bg=bgColor)
             escenario.place(x=40, y=120)
@@ -607,7 +667,7 @@ def menu_loop():
             neon = Button(canvas2, text="Neon", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=neon_set)
             neon.place(x=50, y=210)
 
-            futbol = Button(canvas2, text="Futbol", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=baseball_set)
+            futbol = Button(canvas2, text="Baseball", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=baseball_set)
             futbol.place(x=50, y=260)
 
             aceptar_ajustes = Button(canvas2, text="LISTO!", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_ajustes)
@@ -616,8 +676,9 @@ def menu_loop():
             volver = Button(canvas2, text="VOLVER", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_ajustes)
             volver.place(x=10, y=10)
 
+        # Funcion que abre la ventana de puntuaciones
         def mostrar_puntuaciones():
-            def cerrar_mostrar_puntuciones():
+            def cerrar_mostrar_puntuciones():  # Funcion que cierra la ventana puntuaciones
                 global tabla
                 main.deiconify()
                 ventana__mostrar_scores.destroy()
@@ -640,21 +701,21 @@ def menu_loop():
             canvas_tabla = Canvas(canvas_mostrar_scores, width=W2 // 2, height=H2 // 2)
             canvas_tabla.place(x=200, y=100)
 
-            cerrar_scores = Button(canvas_mostrar_scores, text="BACK!", font=fonts + str(20), fg="black", bg="White",
-                                   borderwidth=0, command=cerrar_mostrar_puntuciones)
+            cerrar_scores = Button(canvas_mostrar_scores, text="BACK!", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_mostrar_puntuciones)
             cerrar_scores.place(x=5, y=0)
 
+            # Funcion que lee el txt
             def separarPuntuaciones(i):
                 if i == len(listaScores):
                     return
                 listaScores[i] = listaScores[i].replace("\n", "").split(";")
                 separarPuntuaciones(i + 1)
-
             file = open("Scores.txt", 'r')
             listaScores = file.readlines()
             separarPuntuaciones(0)
             file.close()
 
+            # Funcion que crea la tabla
             def crearTabla(x, y, columns):
                 global tabla
                 if x == len(listaScores):
@@ -671,13 +732,12 @@ def menu_loop():
                     seccion.grid(row=x, column=y)
                     return crearTabla(x, y + 1, columns + [seccion])
 
-            # Llena la tabla anteriormente creada
+            # Funcion que llena la tabla anteriormente creada
             def llenarTabla(x, y):  # funcion que llena la tabla para vendedores con el vendedores.txt
                 global tabla
                 if x == len(listaScores):
                     return
                 elif y != 2:
-                    print(listaScores[x][y])
                     tabla[x][y].insert(0, listaScores[x][y])
                     return llenarTabla(x, y + 1)
                 else:
@@ -704,16 +764,16 @@ def menu_loop():
         playersHightscore = Button(mainCanvas, text='Scores', font=fonts+str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command=mostrar_puntuaciones)
         playersHightscore.place(x=xPoss + 290, y=yPoss + 430)
 
+    # Funcion abre la ventana de puntuaciones
     def puntuaciones(fgColor, bgColor, fonts):
-        def cerrar_puntuaciones():
+        def cerrar_puntuaciones():  # Funcion para cerrar ventana puntuacione
             global secs
             agregar_puntuaciones = open('Scores.txt', 'a')
             agregar_puntuaciones.write(escribir_jugadores.get())
             agregar_puntuaciones.write(';')
-            agregar_puntuaciones.write("su tiempo es " + str(secs) + " segundos")
+            agregar_puntuaciones.write("su tiempo es " + str(int(secs)) + " segundos")
             agregar_puntuaciones.write('\n')
             agregar_puntuaciones.close()
-            print("a")
             main.deiconify()
             ventana_scores.destroy()
 
@@ -747,7 +807,7 @@ def menu_loop():
 
     load_interface(0, 0, 10, 'white', 'black', 'Fixedsys ')
 
-    if end_game:
+    if end_game:  # Inicia la ventana para ingresar datos de puntaje
         puntuaciones('white', 'black', 'Fixedsys ')
 
     main.protocol('WM_DELETE_WINDOW', Quit)
@@ -786,8 +846,8 @@ def game_loop():
         secs = time2 - time1
         run_game = False
         end_game = True
-    # Funcion que inicia el menu de pausa
 
+    # Funcion que inicia el menu de pausa
     def show_pause():
         global run_game
         global loop
@@ -874,7 +934,6 @@ def game_loop():
 
     for sprite in sprites:
         sprite.kill()
-
     py.quit()
 
 
