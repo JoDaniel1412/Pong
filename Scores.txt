@@ -1,1 +1,10 @@
-Jesus;1234
+prueba 1;su tiempo es 3 segundos
+prueba 2;su tiempo es 3 segundos
+prueba 3;su tiempo es 3 segundos
+2;su tiempo es 32.10782551765442 segundos
+12;su tiempo es 22.50660514831543 segundos
+132;su tiempo es 15.19268250465393 segundos
+19;su tiempo es 25.024985551834106 segundos
+166;su tiempo es 33.07829689979553 segundos
+12;su tiempo es 24.243603467941284 segundos
+12;su tiempo es 67.67840909957886 segundos

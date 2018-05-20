@@ -1,8 +1,10 @@
-import pygame as py
 import random
 import time
-from tkinter import *
 from threading import Thread
+from tkinter import *
+import logging
+import pygame as py
+from multiprocessing import Pool
 
 # Colors
 black = (0, 0, 0)
@@ -18,9 +20,12 @@ W1, H1 = 800, 600
 W2, H2 = W//2, H//2
 HW, HH = W / 2, H / 2
 FPS = 60
-secs = 2
+secs = 3
 loop = True
 run_game = True
+tabla = []
+end_game = False
+tiempo_funcion = time.time()
 
 # Default Game Variables
 pallets_selected = 1
@@ -72,7 +77,7 @@ class Game:
         images = self.images[0]
         poss1 = 38
         poss2 = 1026
-        poss3 = poss1 + 5
+        poss3 = poss1 + 7
         poss4 = poss2 + 5
         if self.players == 1:
             if self.pallets == 2:
@@ -234,7 +239,7 @@ class Player(py.sprite.Sprite):
         return large
 
     def get_pallet_size(self):  # Metodo que obtiene las dimensiones de la paleta
-        return self.poss, self.pallet_size
+        return self.rect.center, self.pallet_size
 
     def set_speed(self):  # Metodo que ajusta la velocidad de la paleta segun dificultad
         speed = 0
@@ -259,6 +264,7 @@ class Player(py.sprite.Sprite):
         self.status[0] = boolean
 
     def update(self):  # Metodo que actualiza la posicion de la paleta en la pantalla
+        global tiempo_funcion
         k = py.key.get_pressed()
 
         # En caso de ser 2 paletas
@@ -269,16 +275,42 @@ class Player(py.sprite.Sprite):
                 if k[eval(self.keys[1])]:
                     self.rect.y += self.speed
             if self.status[0] and self.status[1] == 'CPU':  # Ajusta movimiento del cpu y dificultad
+                tiempo3 = time.time()
+                diferencia = int(tiempo3 - tiempo_funcion)
                 for ball in balls:
                     y = ball.get_ball_yPoss()
                     if self.difficulty == 2:
-                        self.rect.y = y
+                        n = 0
+                        posicion3 = 0
+                        for i in players:
+                            if n == 1:
+                                posicion3 = i.get_pallet_size()[0][1]
+                                i.rect.y = y
+                            if n == 3:
+                                i.rect.y = posicion3 + 200
+                            n += 1
                     if self.difficulty == 1:
-                        if secs % 2 == 0:
-                            self.rect.y = y
+                        if diferencia % 2 == 0:
+                            n = 0
+                            posicion3 = 0
+                            for i in players:
+                                if n == 1:
+                                    posicion3 = i.get_pallet_size()[0][1]
+                                    i.rect.y = y
+                                if n == 3:
+                                    i.rect.y = posicion3 + 200
+                                n += 1
                     if self.difficulty == 0:
-                        if secs % 3 == 0:
-                            self.rect.y = y
+                        if diferencia % 3 == 0:
+                            n = 0
+                            posicion3 = 0
+                            for i in players:
+                                if n == 1:
+                                    posicion3 = i.get_pallet_size()[0][1]
+                                    i.rect.y = y
+                                if n == 3:
+                                    i.rect.y = posicion3 + 200
+                                n += 1
             if self.rect.bottom < 0:
                 self.rect.top = H
             if self.rect.top > H:
@@ -292,15 +324,18 @@ class Player(py.sprite.Sprite):
                 if k[eval(self.keys[1])] and self.rect.bottom < H:
                     self.rect.y += self.speed
             if self.status[0] and self.status[1] == 'CPU':  # Ajusta movimiento del cpu y dificultad
+                tiempo3 = time.time()
+                diferencia = int(tiempo3 - tiempo_funcion)
+                print(diferencia)
                 for ball in balls:
                     y = ball.get_ball_yPoss()
                     if self.difficulty == 2:
                         self.rect.y = y
                     if self.difficulty == 1:
-                        if secs % 2 == 0:
+                        if diferencia % 2 == 0:
                             self.rect.y = y
                     if self.difficulty == 0:
-                        if secs % 3 == 0:
+                        if diferencia % 3 == 0:
                             self.rect.y = y
 
 
@@ -432,6 +467,7 @@ class Wall(py.sprite.Sprite):
 
 # Inicia ventana de matriz
 def matrix_loop(M):
+    logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] - %(threadName)-10s : %(message)s')
     main2 = Tk()
     main2.minsize(320, 870)
     main2.resizable(NO, NO)
@@ -583,36 +619,13 @@ def menu_loop():
             volver = Button(canvas2, text="VOLVER", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_ajustes)
             volver.place(x=10, y=10)
 
-        def puntuaciones():
-            def cerrar_puntuciones():
-                main.deiconify()
-                ventana_scores.destroy()
-
-            main.withdraw()
-
-            ventana_scores = Toplevel()
-            ventana_scores.title("Ingreso de Jugador")
-
-            ventana_scores.minsize(W2, H2)
-            ventana_scores.resizable(width=NO, height=NO)
-
-            canvas_scores = Canvas(ventana_scores, width=W2, height=H2, bg="black")
-            canvas_scores.place(x=-1, y=0)
-
-            label_scores = Label(canvas_scores, text="Digite nombre de jugador:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            label_scores.place(x=40, y=120)
-
-            escribir_jugadores = Entry(canvas_scores, width=30)
-            escribir_jugadores.place(x=200, y=300)
-
-            def agregar_scores():
-                agregar_puntuaciones = open('Scores.txt', 'a')
-                agregar_puntuaciones.write = (escribir_jugadores.get())
 
         def mostrar_puntuaciones():
             def cerrar_mostrar_puntuciones():
+                global tabla
                 main.deiconify()
                 ventana__mostrar_scores.destroy()
+                tabla = []
 
             main.withdraw()
 
@@ -625,12 +638,11 @@ def menu_loop():
             canvas_mostrar_scores = Canvas(ventana__mostrar_scores, width=W2, height=H2, bg="black")
             canvas_mostrar_scores.place(x=-1, y=0)
 
-            label_mejores = Label(canvas_mostrar_scores, text="Mejores Puntuaciones:", font=fonts + str(20), fg=fgColor,
-                                  bg=bgColor)
-            label_mejores.place(x=200, y=120)
+            label_mejores = Label(canvas_mostrar_scores, text="Mejores Puntuaciones:", font=fonts + str(20), fg=fgColor,bg=bgColor)
+            label_mejores.place(x=200, y=40)
 
             canvas_tabla = Canvas(canvas_mostrar_scores, width=W2 // 2, height=H2 // 2)
-            canvas_tabla.place(x=200, y=200)
+            canvas_tabla.place(x=200, y=100)
 
             cerrar_scores = Button(canvas_mostrar_scores, text="BACK!", font=fonts + str(20), fg="black", bg="White",
                                    borderwidth=0, command=cerrar_mostrar_puntuciones)
@@ -656,10 +668,10 @@ def menu_loop():
                     return crearTabla(x + 1, 0, [])
                 else:
                     if y == 0:
-                        seccion = Entry(canvas_tabla, text='', width=3, justify=CENTER)
+                        seccion = Entry(canvas_tabla, text='', width=15, justify=CENTER, bg = bgColor, fg = fgColor)
                         seccion.grid(row=x, column=y)
                         return crearTabla(x, y + 1, columns + [seccion])
-                    seccion = Entry(canvas_tabla, text='', width=30)
+                    seccion = Entry(canvas_tabla, text='', width=30, bg = bgColor, fg = fgColor)
                     seccion.grid(row=x, column=y)
                     return crearTabla(x, y + 1, columns + [seccion])
 
@@ -677,7 +689,6 @@ def menu_loop():
 
             crearTabla(0, 0, [])
             llenarTabla(0, 0)
-            tabla = []
 
         mainCanvas = Canvas(main, width=W1, height=H1, bg=bgColor)
         mainCanvas.place(x=xPoss, y=yPoss)
@@ -694,8 +705,41 @@ def menu_loop():
         playersOption = Button(mainCanvas, text='Options', font=fonts+str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command=ajustes)
         playersOption.place(x=xPoss + 290, y=yPoss + 370)
 
-        playersHightscore = Button(mainCanvas, text='Scores', font=fonts+str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0)
+        playersHightscore = Button(mainCanvas, text='Scores', font=fonts+str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command = mostrar_puntuaciones)
         playersHightscore.place(x=xPoss + 290, y=yPoss + 430)
+
+    def puntuaciones(xPoss, yPoss, xWidth, fgColor, bgColor, fonts):
+        def cerrar_puntuaciones():
+            global secs
+            agregar_puntuaciones = open('Scores.txt', 'a')
+            agregar_puntuaciones.write(escribir_jugadores.get())
+            agregar_puntuaciones.write (';')
+            agregar_puntuaciones.write ("su tiempo es " + str(secs) + " segundos")
+            agregar_puntuaciones.write ('\n')
+            agregar_puntuaciones.close()
+            print("a")
+            main.deiconify()
+            ventana_scores.destroy()
+
+        main.withdraw()
+
+        ventana_scores = Toplevel()
+        ventana_scores.title("Ingreso de Jugador")
+
+        ventana_scores.minsize(W2, H2)
+        ventana_scores.resizable(width=NO, height=NO)
+
+        canvas_scores = Canvas(ventana_scores, width=W2, height=H2, bg="black")
+        canvas_scores.place(x=-1, y=0)
+
+        label_scores = Label(canvas_scores, text="Digite nombre de jugador:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+        label_scores.place(x=150, y=120)
+
+        escribir_jugadores = Entry(canvas_scores, width=30)
+        escribir_jugadores.place(x = 250 , y = 200)
+
+        insertar_puntuacion = Button(canvas_scores, text="Aceptar", font=fonts, width = 20, command = cerrar_puntuaciones )
+        insertar_puntuacion.place(x = 260, y = 260)
 
     # Funcion para detener la ejecucion del programa
     def Quit():
@@ -707,6 +751,9 @@ def menu_loop():
 
     load_interface(0, 0, 10, 'white', 'black', 'Fixedsys ')
 
+    if end_game:
+        puntuaciones(0, 0, 10, 'white', 'black', 'Fixedsys ')
+
     main.protocol('WM_DELETE_WINDOW', Quit)
     main.mainloop()
 
@@ -716,6 +763,7 @@ def game_loop():
     global secs
     global loop
     global run_game
+    time1 = time.time()
     py.init()
     display = py.display.set_mode((W, H))
     py.display.set_caption('Pong')
@@ -733,6 +781,15 @@ def game_loop():
     walls_images = game.load_images()[3]
     walls_spawn = game.get_wall_spawn_rate()
 
+    #Funcion que define cuando se acaba el juego
+    def win_game():
+        global secs
+        global end_game
+        global run_game
+        time2 = time.time()
+        secs = time2 - time1
+        run_game = False
+        end_game = True
     # Funcion que inicia el menu de pausa
     def show_pause():
         global run_game
@@ -756,6 +813,7 @@ def game_loop():
 
     # Game loop
     while run_game:
+        global secs
         clock.tick(FPS)
         for event in py.event.get():
             if event.type == py.QUIT:
@@ -763,6 +821,7 @@ def game_loop():
                 loop = False
             if event.type == py.KEYDOWN and event.key == py.K_ESCAPE:
                 run_game = False
+                secs = 3
             if event.type == py.KEYUP and event.key == py.K_p:
                 show_pause()
             if event.type == py.KEYUP and event.key == py.K_m:
@@ -804,6 +863,9 @@ def game_loop():
 
         # Update
         sprites.update()
+        game_scores = game.get_scores()
+        if game_scores[0] == 5 or game_scores[1] == 5:
+            win_game()
 
         # Draw
         display.blit(back_grounds, (0, 0))
@@ -817,7 +879,6 @@ def game_loop():
         sprite.kill()
 
     py.quit()
-
 
 # Controla los ciclos entre menu y juego
 while loop:
