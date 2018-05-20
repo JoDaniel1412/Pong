@@ -15,14 +15,15 @@ yellow = (255, 255, 0)
 # Variables
 W, H = 1400, 800
 W1, H1 = 800, 600
-W2, H2 = W//2, H//2
-HW, HH = W / 2, H / 2
+W2, H2 = 320, 870
+HW, HH = W // 2, H // 2
 FPS = 60
 secs = 3
 loop = True
 run_game = True
-tabla = []
 end_game = False
+matrix_running = False
+tabla = []
 tiempo_funcion = time.time()
 
 # Default Game Variables
@@ -249,7 +250,7 @@ class Player(py.sprite.Sprite):
 
     # Metodo que obtiene las dimensiones de la paleta
     def get_pallet_size(self):
-        return self.rect.center, self.pallet_size
+        return self.rect.center, self.pallet_size, self.poss
 
     # Metodo que ajusta la velocidad de la paleta segun dificultad
     def set_speed(self):
@@ -497,35 +498,47 @@ class Wall(py.sprite.Sprite):
 # Inicia ventana de matriz
 def matrix_loop(M):
     main2 = Tk()
-    main2.minsize(320, 870)
+    main2.minsize(W2, H2)
     main2.resizable(NO, NO)
     main2.title('Matrix')
     main2.config(bg='black')
+    update = True
+
     canvas = Canvas(main2, bg='black', width=W2, height=H2)
     canvas.place(x=5, y=5)
+
+    # Funcion para detener la ejecucion de la ventana
+    def Quit():
+        global update
+        global matrix_running
+        update = False
+        matrix_running = False
+        main2.destroy()
 
     # Funcion que dibuja una matrix en grids
     def draw_matrix():
         size = []
-        while True:
-            for ball in balls:
-                size.append(ball.get_ball_center())
-            for each in players:
-                size.append(each.get_pallet_size())
-            for n in range(len(M)):
-                if n == size[0][1]:
-                    square = Label(canvas, text='1', fg='white', bg='red')
-                    square.grid(row=M[n][0], column=M[n][1])
-                elif n == size[1][0] or n == size[2][0]:
-                    square = Label(canvas, text='2', fg='white', bg='green')
-                    square.grid(row=M[n][0], column=M[n][1])
-                else:
-                    square = Label(canvas, text='0', fg='white', bg='black')
-                    square.grid(row=M[n][0], column=M[n][1])
+        for ball in balls:
+            size.append(ball.get_ball_center())
+        for each in players:
+            size.append(each.get_pallet_size())
+        for wall in walls:
+            size.append(wall.get_center())
+        for n in range(len(M)):
+            if n == size[0][1]:
+                square = Label(canvas, text='1', fg='white', bg='red')
+                square.grid(row=M[n][0], column=M[n][1])
+            elif n == size[1][2] or n == size[2][2]:
+                square = Label(canvas, text='2', fg='white', bg='green')
+                square.grid(row=M[n][0], column=M[n][1])
+            else:
+                square = Label(canvas, text='0', fg='white', bg='black')
+                square.grid(row=M[n][0], column=M[n][1])
 
-    matrix = Thread(target=draw_matrix)
-    matrix.start()
+    button = Button(main2, text='update', command=draw_matrix)
+    button.place(x=0, y=0)
 
+    main2.protocol('WM_DELETE_WINDOW', Quit)
     main2.mainloop()
 
 
@@ -689,16 +702,16 @@ def menu_loop():
             ventana__mostrar_scores = Toplevel()
             ventana__mostrar_scores.title("Puntuaciones")
 
-            ventana__mostrar_scores.minsize(W2, H2)
+            ventana__mostrar_scores.minsize(HW, HH)
             ventana__mostrar_scores.resizable(width=NO, height=NO)
 
-            canvas_mostrar_scores = Canvas(ventana__mostrar_scores, width=W2, height=H2, bg="black")
+            canvas_mostrar_scores = Canvas(ventana__mostrar_scores, width=HW, height=HH, bg="black")
             canvas_mostrar_scores.place(x=-1, y=0)
 
             label_mejores = Label(canvas_mostrar_scores, text="Mejores Puntuaciones:", font=fonts + str(20), fg=fgColor, bg=bgColor)
             label_mejores.place(x=200, y=40)
 
-            canvas_tabla = Canvas(canvas_mostrar_scores, width=W2 // 2, height=H2 // 2)
+            canvas_tabla = Canvas(canvas_mostrar_scores, width=HW // 2, height=H2 // 2)
             canvas_tabla.place(x=200, y=100)
 
             cerrar_scores = Button(canvas_mostrar_scores, text="BACK!", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_mostrar_puntuciones)
@@ -782,10 +795,10 @@ def menu_loop():
         ventana_scores = Toplevel()
         ventana_scores.title("Ingreso de Jugador")
 
-        ventana_scores.minsize(W2, H2)
+        ventana_scores.minsize(HW, HH)
         ventana_scores.resizable(width=NO, height=NO)
 
-        canvas_scores = Canvas(ventana_scores, width=W2, height=H2, bg="black")
+        canvas_scores = Canvas(ventana_scores, width=HW, height=HH, bg="black")
         canvas_scores.place(x=-1, y=0)
 
         label_scores = Label(canvas_scores, text="Digite nombre de jugador:", font=fonts + str(20), fg=fgColor, bg=bgColor)
@@ -871,6 +884,7 @@ def game_loop():
     # Game loop
     while run_game:
         global secs
+        global matrix_running
         clock.tick(FPS)
         for event in py.event.get():
             if event.type == py.QUIT:
@@ -882,8 +896,12 @@ def game_loop():
             if event.type == py.KEYUP and event.key == py.K_p:
                 show_pause()
             if event.type == py.KEYUP and event.key == py.K_m:
-                tkinter_matrix = Thread(target=matrix_loop)
-                matrix_loop(M)
+                if not matrix_running:
+                    def star_matrix():
+                        matrix_loop(M)
+                    tkinter_matrix = Thread(target=star_matrix)
+                    tkinter_matrix.start()
+                    matrix_running = True
 
         # Cronometro
         time_lapsed = py.time.get_ticks()//1000
