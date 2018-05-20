@@ -2,9 +2,7 @@ import random
 import time
 from threading import Thread
 from tkinter import *
-import logging
 import pygame as py
-from multiprocessing import Pool
 
 # Colors
 black = (0, 0, 0)
@@ -467,7 +465,6 @@ class Wall(py.sprite.Sprite):
 
 # Inicia ventana de matriz
 def matrix_loop(M):
-    logging.basicConfig(level=logging.DEBUG, format='[%(levelname)s] - %(threadName)-10s : %(message)s')
     main2 = Tk()
     main2.minsize(320, 870)
     main2.resizable(NO, NO)
@@ -619,7 +616,6 @@ def menu_loop():
             volver = Button(canvas2, text="VOLVER", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_ajustes)
             volver.place(x=10, y=10)
 
-
         def mostrar_puntuaciones():
             def cerrar_mostrar_puntuciones():
                 global tabla
@@ -638,7 +634,7 @@ def menu_loop():
             canvas_mostrar_scores = Canvas(ventana__mostrar_scores, width=W2, height=H2, bg="black")
             canvas_mostrar_scores.place(x=-1, y=0)
 
-            label_mejores = Label(canvas_mostrar_scores, text="Mejores Puntuaciones:", font=fonts + str(20), fg=fgColor,bg=bgColor)
+            label_mejores = Label(canvas_mostrar_scores, text="Mejores Puntuaciones:", font=fonts + str(20), fg=fgColor, bg=bgColor)
             label_mejores.place(x=200, y=40)
 
             canvas_tabla = Canvas(canvas_mostrar_scores, width=W2 // 2, height=H2 // 2)
@@ -668,10 +664,10 @@ def menu_loop():
                     return crearTabla(x + 1, 0, [])
                 else:
                     if y == 0:
-                        seccion = Entry(canvas_tabla, text='', width=15, justify=CENTER, bg = bgColor, fg = fgColor)
+                        seccion = Entry(canvas_tabla, text='', width=15, justify=CENTER, bg=bgColor, fg=fgColor)
                         seccion.grid(row=x, column=y)
                         return crearTabla(x, y + 1, columns + [seccion])
-                    seccion = Entry(canvas_tabla, text='', width=30, bg = bgColor, fg = fgColor)
+                    seccion = Entry(canvas_tabla, text='', width=30, bg=bgColor, fg=fgColor)
                     seccion.grid(row=x, column=y)
                     return crearTabla(x, y + 1, columns + [seccion])
 
@@ -705,17 +701,17 @@ def menu_loop():
         playersOption = Button(mainCanvas, text='Options', font=fonts+str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command=ajustes)
         playersOption.place(x=xPoss + 290, y=yPoss + 370)
 
-        playersHightscore = Button(mainCanvas, text='Scores', font=fonts+str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command = mostrar_puntuaciones)
+        playersHightscore = Button(mainCanvas, text='Scores', font=fonts+str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command=mostrar_puntuaciones)
         playersHightscore.place(x=xPoss + 290, y=yPoss + 430)
 
-    def puntuaciones(xPoss, yPoss, xWidth, fgColor, bgColor, fonts):
+    def puntuaciones(fgColor, bgColor, fonts):
         def cerrar_puntuaciones():
             global secs
             agregar_puntuaciones = open('Scores.txt', 'a')
             agregar_puntuaciones.write(escribir_jugadores.get())
-            agregar_puntuaciones.write (';')
-            agregar_puntuaciones.write ("su tiempo es " + str(secs) + " segundos")
-            agregar_puntuaciones.write ('\n')
+            agregar_puntuaciones.write(';')
+            agregar_puntuaciones.write("su tiempo es " + str(secs) + " segundos")
+            agregar_puntuaciones.write('\n')
             agregar_puntuaciones.close()
             print("a")
             main.deiconify()
@@ -736,10 +732,10 @@ def menu_loop():
         label_scores.place(x=150, y=120)
 
         escribir_jugadores = Entry(canvas_scores, width=30)
-        escribir_jugadores.place(x = 250 , y = 200)
+        escribir_jugadores.place(x=250, y=200)
 
-        insertar_puntuacion = Button(canvas_scores, text="Aceptar", font=fonts, width = 20, command = cerrar_puntuaciones )
-        insertar_puntuacion.place(x = 260, y = 260)
+        insertar_puntuacion = Button(canvas_scores, text="Aceptar", font=fonts, width=20, command=cerrar_puntuaciones)
+        insertar_puntuacion.place(x=260, y=260)
 
     # Funcion para detener la ejecucion del programa
     def Quit():
@@ -752,7 +748,7 @@ def menu_loop():
     load_interface(0, 0, 10, 'white', 'black', 'Fixedsys ')
 
     if end_game:
-        puntuaciones(0, 0, 10, 'white', 'black', 'Fixedsys ')
+        puntuaciones('white', 'black', 'Fixedsys ')
 
     main.protocol('WM_DELETE_WINDOW', Quit)
     main.mainloop()
@@ -781,7 +777,7 @@ def game_loop():
     walls_images = game.load_images()[3]
     walls_spawn = game.get_wall_spawn_rate()
 
-    #Funcion que define cuando se acaba el juego
+    # Funcion que define cuando se acaba el juego
     def win_game():
         global secs
         global end_game
@@ -791,18 +787,19 @@ def game_loop():
         run_game = False
         end_game = True
     # Funcion que inicia el menu de pausa
+
     def show_pause():
         global run_game
         global loop
         pause = True
         while pause:
             clock.tick(FPS)
-            for event in py.event.get():
-                if event.type == py.QUIT:
+            for events in py.event.get():
+                if events.type == py.QUIT:
                     pause = False
                     run_game = False
                     loop = False
-                if event.type == py.KEYUP:
+                if events.type == py.KEYUP:
                     pause = False
 
             # Dibujar textos durante la pausa
@@ -879,6 +876,7 @@ def game_loop():
         sprite.kill()
 
     py.quit()
+
 
 # Controla los ciclos entre menu y juego
 while loop:
