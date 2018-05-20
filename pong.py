@@ -164,7 +164,7 @@ class Game:
             music = py.mixer.Sound('sound/neon_music.ogg')
         if self.style == 2:
             bounce = py.mixer.Sound('sound/baseball_bounce.wav')
-            score = py.mixer.Sound('sound/baseball_score.wav')
+            score = py.mixer.Sound('sound/baseball_score.ogg')
             music = py.mixer.Sound('sound/baseball_music.ogg')
         return bounce, score, music
 
