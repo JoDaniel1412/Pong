@@ -31,6 +31,7 @@ pallets_selected = 1
 difficulty_selected = 1
 style_selected = 0
 players_selected = 1
+top_points = 5
 py.mixer.init()
 
 # Sprite Groups
@@ -635,6 +636,19 @@ def menu_loop():
                 una_paleta['bg'], una_paleta['fg'] = bgColor, fgColor
                 dos_paletas['bg'], dos_paletas['fg'] = fgColor, bgColor
 
+            # Configura el puntaje maximo a 5
+            def puntaje5():
+                global top_points
+                top_points = 5
+                top_points5['bg'], top_points5['fg'] = fgColor, bgColor
+                top_points10['bg'], top_points10['fg'] = bgColor, fgColor
+
+            # Configura el puntaje maximo a 10
+            def puntaje10():
+                global top_points
+                top_points = 10
+                top_points10['bg'], top_points10['fg'] = fgColor, bgColor
+                top_points5['bg'], top_points5['fg'] = bgColor, fgColor
             main.withdraw()
 
             ventana2 = Toplevel()
@@ -650,16 +664,25 @@ def menu_loop():
             settings.place(x=290, y=10)
 
             dificultad = Label(canvas2, text="Seleccione dificultad:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            dificultad.place(x=230, y=420)
+            dificultad.place(x=20, y=360)
 
             facil = Button(canvas2, text="Facil", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=easy)
-            facil.place(x=180, y=470)
+            facil.place(x=50, y=400)
 
             medio = Button(canvas2, text="Medio", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=medium)
-            medio.place(x=330, y=470)
+            medio.place(x=50, y=450)
 
             dificil = Button(canvas2, text="Dificil", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=hard)
-            dificil.place(x=480, y=470)
+            dificil.place(x=50, y=510)
+
+            top_points = Label(canvas2, text="Puntos Maximos:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+            top_points.place(x=460, y=360)
+
+            top_points5 = Button(canvas2, text="5 Puntos", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=puntaje5)
+            top_points5.place(x=500, y=400)
+
+            top_points10 = Button(canvas2, text="10 Puntos", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=puntaje10)
+            top_points10.place(x=500, y=450)
 
             paletas = Label(canvas2, text="Seleccione paletas:", font=fonts + str(20), fg=fgColor, bg=bgColor)
             paletas.place(x=460, y=120)
@@ -939,7 +962,7 @@ def game_loop():
         # Update
         sprites.update()
         game_scores = game.get_scores()
-        if game_scores[0] == 5 or game_scores[1] == 5:
+        if game_scores[0] == top_points or game_scores[1] == top_points:
             win_game()
 
         # Draw
