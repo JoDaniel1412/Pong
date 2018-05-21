@@ -372,7 +372,7 @@ class Ball(py.sprite.Sprite):
         self.xSpeed = random.choice(self.speed)
         self.ySpeed = random.choice(self.speed)
         self.sound_effects = game.get_sound_effects()
-        self.speed_limit = 55
+        self.speed_limit = 50
         self.rotation_speed = 7
         self.last_rotation = 0
 
@@ -383,6 +383,9 @@ class Ball(py.sprite.Sprite):
 
     # Metodo para obtener la posicion de la bola
     def get_ball_poss(self):
+        return self.rect.center
+
+    def get_ball_center(self):
         return self.rect.center
 
     # Metodo que obtiene la posicion en Y de la bola
@@ -931,6 +934,7 @@ def game_loop():
             sound_effects[0].play()
             for element in balls:
                 element.set_xSpeed()
+                element.ySpeed = random.randrange(-5, 5)
 
         # Update
         sprites.update()
