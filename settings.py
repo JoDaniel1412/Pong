@@ -19,6 +19,7 @@ pallets_selected = 1
 difficulty_selected = 1
 style_selected = 0
 players_selected = 1
+walls_able = 0
 top_points = 5
 
 # Players controls
