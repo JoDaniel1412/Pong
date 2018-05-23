@@ -25,11 +25,12 @@ walls = py.sprite.Group()
 # Instancias: cantidad de jugadores(1 o 2), cantidad de paletas(1 o 2), difficultad(0, 1 o 2), stylo del arte(0, 1, 2)
 # Metodos: crear y obtener la mtatriz, iniciar el juego, cargar imagenes, sonidos, dibujar puntaje y frecuencia de muros
 class Game:
-    def __init__(self, player, pallets, difficulty, style):
+    def __init__(self, player, pallets, difficulty, style, wall):
         self.players = player
         self.pallets = pallets
         self.difficulty = difficulty
         self.style = style
+        self.wall = wall
         self.images = self.load_images()
         self.sound_effects = self.load_sounds()
         self.matrix = []
@@ -627,6 +628,19 @@ def menu_loop():
                 top_points = 10
                 top_points10['bg'], top_points10['fg'] = fgColor, bgColor
                 top_points5['bg'], top_points5['fg'] = bgColor, fgColor
+
+            # Configura si desea jugar con obstaculos
+            def activate_walls():
+                global walls_able
+                if walls_able == 0:
+                    walls_able = 1
+                    activa_muros['text'] = 'Activos'
+                    activa_muros['bg'], activa_muros['fg'] = fgColor, bgColor
+                else:
+                    walls_able = 0
+                    activa_muros['text'] = 'Desactivados'
+                    activa_muros['bg'], activa_muros['fg'] = bgColor, fgColor
+
             main.withdraw()
 
             ventana2 = Toplevel()
@@ -653,26 +667,26 @@ def menu_loop():
             dificil = Button(canvas2, text="Dificil", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=hard)
             dificil.place(x=50, y=510)
 
-            top_points = Label(canvas2, text="Puntos Maximos:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            top_points.place(x=460, y=360)
+            top_points = Label(canvas2, text="Seleccione Puntos:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+            top_points.place(x=460, y=300)
 
             top_points5 = Button(canvas2, text="5 Puntos", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=puntaje5)
-            top_points5.place(x=500, y=400)
+            top_points5.place(x=500, y=340)
 
             top_points10 = Button(canvas2, text="10 Puntos", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=puntaje10)
-            top_points10.place(x=500, y=450)
+            top_points10.place(x=500, y=390)
 
             paletas = Label(canvas2, text="Seleccione paletas:", font=fonts + str(20), fg=fgColor, bg=bgColor)
             paletas.place(x=460, y=120)
 
             una_paleta = Button(canvas2, text="Una paleta", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=pallets_select1)
-            una_paleta.place(x=500, y=180)
+            una_paleta.place(x=500, y=160)
 
             dos_paletas = Button(canvas2, text="Dos paletas", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=pallets_select2)
-            dos_paletas.place(x=500, y=240)
+            dos_paletas.place(x=500, y=220)
 
-            escenario = Label(canvas2, text="Escoja escenario:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            escenario.place(x=40, y=120)
+            escenario = Label(canvas2, text="Seleccione escenario:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+            escenario.place(x=20, y=120)
 
             clasico = Button(canvas2, text="Clasico", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=default_set)
             clasico.place(x=50, y=160)
@@ -682,6 +696,12 @@ def menu_loop():
 
             futbol = Button(canvas2, text="Baseball", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=baseball_set)
             futbol.place(x=50, y=260)
+
+            muros = Label(canvas2, text="Seleccione Muros:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+            muros.place(x=460, y=480)
+
+            activa_muros = Button(canvas2, text='Desactivados', font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=activate_walls)
+            activa_muros.place(x=500, y=520)
 
             aceptar_ajustes = Button(canvas2, text="LISTO!", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_ajustes)
             aceptar_ajustes.place(x=670, y=10)
@@ -838,7 +858,7 @@ def game_loop():
     clock = py.time.Clock()
 
     # Inicia la Clase Game
-    game = Game(players_selected, pallets_selected, difficulty_selected, style_selected)
+    game = Game(players_selected, pallets_selected, difficulty_selected, style_selected, walls_able)
     game.start_game()
 
     # Cargar fondo, sonidos y otros
@@ -911,7 +931,7 @@ def game_loop():
         hits = py.sprite.groupcollide(players, balls, False, False)
         if hits:
             sound_effects[0].play()
-            if random.random() > walls_spawn:
+            if game.wall == 1 and random.random() > walls_spawn:
                 wall = Wall(M, walls_images)
                 sprites.add(wall)
                 walls.add(wall)
