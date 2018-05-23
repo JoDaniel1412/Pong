@@ -14,14 +14,15 @@ HW, HH = W // 2, H // 2
 FPS = 60
 secs = 3
 
-# Default Game Variables
+# Default Game Settings
 pallets_selected = 1
 difficulty_selected = 1
 style_selected = 0
 players_selected = 1
 walls_able = 0
 top_points = 5
+starting_game_speed = 30
 
-# Players controls
+# Players Settings
 player1_keys = ('py.K_w', 'py.K_s')
 player2_keys = ('py.K_UP', 'py.K_DOWN')
