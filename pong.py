@@ -61,6 +61,15 @@ class Game:
         poss2 = 1026
         poss3 = poss1 + 7
         poss4 = poss2 + 5
+        if self.players == 0:  # En caso de ser modo practica
+            if self.pallets == 2:
+                poss1 -= 4
+                humane2 = Player(player1_keys, self.difficulty, poss3, self.matrix, [True, 'HUMANE'], images[1], self.pallets)
+                sprites.add(humane2)
+                players.add(humane2)
+            humane = Player(player1_keys, self.difficulty, poss1, self.matrix, [True, 'HUMANE'], images[0], self.pallets)
+            sprites.add(humane)
+            players.add(humane)
         if self.players == 1:  # En caso de ser un jugador
             if self.pallets == 2:
                 poss1 -= 4
@@ -211,6 +220,7 @@ class Player(py.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = self.matrix[self.poss]
         self.speed_limit = 40
+        self.adjust_speed()
 
     # Metodo que retorna una lista con los segmentos de la paleta
     def pallet_segments(self):
@@ -243,6 +253,13 @@ class Player(py.sprite.Sprite):
             speed = 15
         return speed
 
+    # Metodo que ajusta la velocidad de la paleta en modo practica
+    def adjust_speed(self):
+        if starting_game_speed > 0:
+            self.speed = starting_game_speed * 3/4
+            if self.speed > self.speed_limit:
+                self.speed = self.speed_limit
+
     # Metodo para aumentar la velocidad progresivamente
     def increase_xSpeed(self):
         if self.speed_limit > self.speed > 0:
@@ -252,7 +269,8 @@ class Player(py.sprite.Sprite):
 
     # Metodo par reiniciar la velocidad
     def reset_speed(self):
-        self.speed = self.default_speed
+        if starting_game_speed == 0:
+            self.speed = self.default_speed
 
     # Metodo para obtener el estado de la paleta
     def set_status(self, boolean):
@@ -353,6 +371,7 @@ class Ball(py.sprite.Sprite):
         self.ySpeed = random.choice(self.speed)
         self.sound_effects = game.get_sound_effects()
         self.speed_limit = 50
+        self.adjust_speed()
         self.rotation_speed = 7
         self.last_rotation = 0
 
@@ -413,6 +432,13 @@ class Ball(py.sprite.Sprite):
             speed_range = [-10, 10]
         return speed_range
 
+    # Metodo que ajusta la velocidad de la pelota en modo practica
+    def adjust_speed(self):
+        if starting_game_speed > 0:
+            self.xSpeed = starting_game_speed
+            if self.xSpeed > self.speed_limit:
+                self.xSpeed = self.speed_limit
+
     # Metodo que ajusta el radio de la bola segun dificultad
     def set_size(self):
         ball_size = 0
@@ -435,26 +461,30 @@ class Ball(py.sprite.Sprite):
         self.rotate()
         self.rect.x += self.xSpeed
         self.rect.y += self.ySpeed
-        if self.rect.top <= 0:
+        if self.rect.top <= 0:  # Colision superior
             self.ySpeed = -self.ySpeed
             self.rect.top = 1
             self.sound_effects[0].play()
-        if self.rect.bottom >= H:
+        if self.rect.bottom >= H:  # Colision inferior
             self.ySpeed = -self.ySpeed
             self.rect.bottom = H-1
             self.sound_effects[0].play()
-        if self.rect.left < 0:
+        if self.rect.left < 0:  # Punto a la izquierda
             self.sound_effects[1].play()
             self.game.add_score2()
             time.sleep(1)
             self.kill()
             self.new_ball()
-        if self.rect.right > W:
+        if not self.game.players == 0 and self.rect.right > W:  # Punto a la derecha
             self.sound_effects[1].play()
             self.game.add_score1()
             time.sleep(1)
             self.kill()
             self.new_ball()
+        if self.game.players == 0 and self.rect.right > W:  # Colision derecha en modo practica
+            self.set_xSpeed()
+            self.rect.right = W-1
+            self.sound_effects[0].play()
 
 
 # Clase que crea la muros
@@ -542,6 +572,14 @@ def menu_loop():
         global players_selected
         global run_game
         players_selected = 2
+        run_game = True
+        main.destroy()
+
+    # Inicia el juego en modo practica
+    def practice_mode():
+        global players_selected
+        global run_game
+        players_selected = 0
         run_game = True
         main.destroy()
 
@@ -796,6 +834,9 @@ def menu_loop():
 
         playersHightscore = Button(mainCanvas, text='Scores', font=fonts+str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command=mostrar_puntuaciones)
         playersHightscore.place(x=xPoss + 290, y=yPoss + 430)
+
+        practiceButton = Button(mainCanvas, text='Practicar', font=fonts+str(20), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command=practice_mode)
+        practiceButton.place(x=xPoss + 20, y=yPoss + 540)
 
     # Funcion abre la ventana de puntuaciones
     def puntuaciones(fgColor, bgColor, fonts):
