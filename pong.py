@@ -3,35 +3,15 @@ import time
 from threading import Thread
 from tkinter import *
 import pygame as py
+from settings import *
 
-# Colors
-black = (0, 0, 0)
-white = (255, 255, 255)
-red = (255, 0, 0)
-green = (0, 255, 0)
-blue = (0, 0, 255)
-yellow = (255, 255, 0)
-
-# Variables
-W, H = 1400, 800
-W1, H1 = 800, 600
-W2, H2 = 320, 870
-HW, HH = W // 2, H // 2
-FPS = 60
-secs = 3
+# Loop Variables
 loop = True
 run_game = True
 end_game = False
 matrix_running = False
 tabla = []
 tiempo_funcion = time.time()
-
-# Default Game Variables
-pallets_selected = 1
-difficulty_selected = 1
-style_selected = 0
-players_selected = 1
-top_points = 5
 py.mixer.init()
 
 # Sprite Groups
@@ -75,8 +55,6 @@ class Game:
 
     # Metodo para iniciar el juego
     def start_game(self):
-        player1_keys = ('py.K_w', 'py.K_s')
-        player2_keys = ('py.K_UP', 'py.K_DOWN')
         images = self.images[0]
         poss1 = 38
         poss2 = 1026
@@ -802,7 +780,6 @@ def menu_loop():
     # Funcion abre la ventana de puntuaciones
     def puntuaciones(fgColor, bgColor, fonts):
         def cerrar_puntuaciones():  # Funcion para cerrar ventana puntuacione
-            global secs
             agregar_puntuaciones = open('Scores.txt', 'a')
             agregar_puntuaciones.write(escribir_jugadores.get())
             agregar_puntuaciones.write(';')
