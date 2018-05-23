@@ -1,3 +1,4 @@
 Jose;su tiempo es 28 segundos
 Shuzz;su tiempo es 46 segundos
 Fer;su tiempo es 78 segundos
+Arturo;su tiempo es 23 segundos
