@@ -21,7 +21,7 @@ style_selected = 0
 players_selected = 1
 walls_able = 0
 top_points = 5
-starting_game_speed = 30
+starting_game_speed = 0
 angle_hit = 8
 pallets_size = 0
 
@@ -29,3 +29,5 @@ pallets_size = 0
 player1_keys = ('py.K_w', 'py.K_s')
 player2_keys = ('py.K_UP', 'py.K_DOWN')
 return_key = 'py.K_ESCAPE'
+pause_key = 'py.K_p'
+matrix_key = 'py.K_m'
