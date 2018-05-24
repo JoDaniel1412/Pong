@@ -8,7 +8,7 @@ from settings import *
 # Loop Variables
 loop = True
 run_game = True
-end_game = False
+scores_game = False
 matrix_running = False
 tabla = []
 tiempo_funcion = time.time()
@@ -802,7 +802,6 @@ def menu_loop():
             start = Button(canvas, text="Iniciar", font=fonts + str(20), fg=bgColor, bg=fgColor, borderwidth=0, command=star_game)
             start.place(x=W1/2-50, y=400)
 
-
         # Funcion que abre la ventana de puntuaciones
         def mostrar_puntuaciones():
             def cerrar_mostrar_puntuciones():  # Funcion que cierra la ventana puntuaciones
@@ -823,10 +822,16 @@ def menu_loop():
             canvas_mostrar_scores.place(x=-1, y=0)
 
             label_mejores = Label(canvas_mostrar_scores, text="Mejores Puntuaciones:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            label_mejores.place(x=180, y=130)
+            label_mejores.place(x=180, y=80)
+
+            names = Label(canvas_mostrar_scores, text="Jugador", font=fonts + str(10), fg=fgColor, bg=bgColor)
+            names.place(x=280, y=150)
+
+            record = Label(canvas_mostrar_scores, text="Tiempo", font=fonts + str(10), fg=fgColor, bg=bgColor)
+            record.place(x=370, y=150)
 
             canvas_tabla = Canvas(canvas_mostrar_scores, width=HW // 2, height=H2 // 2)
-            canvas_tabla.place(x=210, y=190)
+            canvas_tabla.place(x=270, y=190)
 
             cerrar_scores = Button(canvas_mostrar_scores, text="BACK!", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_mostrar_puntuciones)
             cerrar_scores.place(x=5, y=0)
@@ -855,7 +860,7 @@ def menu_loop():
                         seccion = Entry(canvas_tabla, text='', width=15, justify=CENTER, bg=bgColor, fg=fgColor)
                         seccion.grid(row=x, column=y)
                         return crearTabla(x, y + 1, columns + [seccion])
-                    seccion = Entry(canvas_tabla, text='', width=30, bg=bgColor, fg=fgColor)
+                    seccion = Entry(canvas_tabla, text='', width=10, justify=CENTER, bg=bgColor, fg=fgColor)
                     seccion.grid(row=x, column=y)
                     return crearTabla(x, y + 1, columns + [seccion])
 
@@ -909,14 +914,12 @@ def menu_loop():
         scoresList = scores.readlines()
         scores.close()
         splitScores(0, len(scoresList))
-        print(scoresList)
 
         # Funcion para cerrar ventana puntuacione
         def cerrar_puntuaciones():
             jugador = escribir_jugadores.get()
             tiempo = int(secs)
             if revisarTop(scoresList, jugador, tiempo):
-                print(scoresList)
                 agregar_puntuaciones = open('Scores.txt', 'w')
                 agregar_puntuaciones.write(scoresList[0][0] + ';' + scoresList[0][1])
                 agregar_puntuaciones.write('\n')
@@ -979,7 +982,7 @@ def menu_loop():
 
     load_interface(0, 0, 10, 'white', 'black', 'Fixedsys ')
 
-    if end_game:  # Inicia la ventana para ingresar datos de puntaje
+    if scores_game:  # Inicia la ventana para ingresar datos de puntaje
         puntuaciones('white', 'black', 'Fixedsys ')
 
     main.protocol('WM_DELETE_WINDOW', Quit)
@@ -991,6 +994,8 @@ def game_loop():
     global secs
     global loop
     global run_game
+    global starting_game_speed
+    global pallets_size
     time1 = time.time()
     py.init()
     display = py.display.set_mode((W, H))
@@ -1012,12 +1017,14 @@ def game_loop():
     # Funcion que define cuando se acaba el juego
     def win_game():
         global secs
-        global end_game
+        global scores_game
         global run_game
         time2 = time.time()
         secs = time2 - time1
         run_game = False
-        end_game = True
+        if game.players == 2:
+            scores_game = True
+
 
     # Funcion que inicia el menu de pausa
     def show_pause():
@@ -1110,6 +1117,8 @@ def game_loop():
 
         py.display.update()
 
+    starting_game_speed = 0
+    pallets_size = 0
     for sprite in sprites:
         sprite.kill()
     py.quit()
