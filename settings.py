@@ -13,6 +13,7 @@ W2, H2 = 320, 870
 HW, HH = W // 2, H // 2
 FPS = 60
 secs = 3
+volume = 1
 
 # Default Game Settings
 pallets_selected = 1

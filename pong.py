@@ -466,25 +466,26 @@ class Ball(py.sprite.Sprite):
         if self.rect.top <= 0:  # Colision superior
             self.ySpeed = -self.ySpeed
             self.rect.top = 1
-            self.sound_effects[0].play()
+            self.sound_effects[0].play().set_volume(volume)
         if self.rect.bottom >= H:  # Colision inferior
             self.ySpeed = -self.ySpeed
             self.rect.bottom = H-1
-            self.sound_effects[0].play()
+            self.sound_effects[0].play().set_volume(volume)
         if self.rect.left < 0:  # Punto a la izquierda
-            self.sound_effects[1].play()
+            self.sound_effects[1].play().set_volume(volume)
             self.game.add_score2()
             time.sleep(1)
             self.kill()
             self.new_ball()
         if not self.game.players == 0 and self.rect.right > W:  # Punto a la derecha
-            self.sound_effects[1].play()
+            sound = self.sound_effects[1].play()
+            sound.set_volume(volume)
             self.game.add_score1()
             time.sleep(1)
             self.kill()
             self.new_ball()
         if self.game.players == 0 and self.rect.right > W:  # Colision derecha en modo practica
-            self.sound_effects[0].play()
+            self.sound_effects[0].play().set_volume(volume)
             self.set_xSpeed()
             self.ySpeed = random.randrange(-angle_hit, angle_hit)
             self.rect.right = W-1
@@ -1009,7 +1010,7 @@ def game_loop():
     # Cargar fondo, sonidos y otros
     back_grounds = game.load_images()[2]
     sound_effects = game.get_sound_effects()
-    sound_effects[2].play(loops=-1)
+    music = sound_effects[2].play(loops=-1)
     M = game.get_matrix()
     walls_images = game.load_images()[3]
     walls_spawn = game.get_wall_spawn_rate()
@@ -1024,7 +1025,6 @@ def game_loop():
         run_game = False
         if game.players == 2:
             scores_game = True
-
 
     # Funcion que inicia el menu de pausa
     def show_pause():
@@ -1077,7 +1077,8 @@ def game_loop():
         # Colisiones paleta con bola
         hits = py.sprite.groupcollide(players, balls, False, False)
         if hits:
-            sound_effects[0].play()
+            hit_sound = sound_effects[0].play()
+            hit_sound.set_volume(volume)
             if game.wall == 1 and random.random() > walls_spawn:
                 wall = Wall(M, walls_images)
                 sprites.add(wall)
@@ -1098,7 +1099,8 @@ def game_loop():
 
         # Colisiones bola con muros
         if py.sprite.groupcollide(balls, walls, False, True):
-            sound_effects[0].play()
+            hit_sound = sound_effects[0].play()
+            hit_sound.set_volume(volume)
             for element in balls:
                 element.set_xSpeed()
                 element.ySpeed = random.randrange(-angle_hit, angle_hit)
@@ -1106,6 +1108,7 @@ def game_loop():
         # Update
         sprites.update()
         game_scores = game.get_scores()
+        music.set_volume(volume)
         if game_scores[0] == top_points or game_scores[1] == top_points:
             win_game()
 
