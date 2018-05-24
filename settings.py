@@ -21,8 +21,8 @@ style_selected = 0
 players_selected = 1
 walls_able = 0
 top_points = 5
-starting_game_speed = 0
 angle_hit = 8
+starting_game_speed = 0
 pallets_size = 0
 
 # Game Keys
