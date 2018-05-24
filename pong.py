@@ -578,14 +578,6 @@ def menu_loop():
         run_game = True
         main.destroy()
 
-    # Inicia el juego en modo practica
-    def practice_mode():
-        global players_selected
-        global run_game
-        players_selected = 0
-        run_game = True
-        main.destroy()
-
     # Funcion que inicia la interfaz del menu
     def load_interface(xPoss, yPoss, xWidth, fgColor, bgColor, fonts):
         # Funcion que abre la ventana de ajustes
@@ -749,6 +741,67 @@ def menu_loop():
 
             volver = Button(canvas2, text="VOLVER", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_ajustes)
             volver.place(x=10, y=10)
+
+        # Inicia el juego en modo practica
+        def practice_mode():
+            global players_selected
+            global run_game
+
+            def cerrar_practica():  # Funcion que cierra la ventana ajustes
+                ventana3.destroy()
+                main.deiconify()
+
+            def star_game():  # Funcion que inicia el juego
+                global run_game
+                global players_selected
+                global starting_game_speed
+                global pallets_size
+                velocida = velocidadEntry.get()
+                largo = paletaEntry.get()
+                try:
+                    starting_game_speed = int(velocida)
+                    pallets_size = int(largo)
+                    if pallets_size > 12:
+                        pallets_size = 12
+                    players_selected = 0
+                    run_game = True
+                    main.destroy()
+                except:
+                    error = Label(canvas, text="Debe ingresar numeros enteros", font=fonts + str(10), fg='red', bg=bgColor)
+                    error.place(x=450, y=250)
+
+            main.withdraw()
+
+            ventana3 = Toplevel()
+            ventana3.title("Practica")
+
+            ventana3.minsize(W1, H1)
+            ventana3.resizable(width=NO, height=NO)
+
+            canvas = Canvas(ventana3, width=W1, height=H1, bg="black")
+            canvas.place(x=-1, y=0)
+
+            volver = Button(canvas, text="VOLVER", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_practica)
+            volver.place(x=10, y=10)
+
+            practica = Label(canvas, text="Practica", font=fonts + str(40), fg=fgColor, bg=bgColor)
+            practica.place(x=290, y=10)
+
+            velocidad = Label(canvas, text="Ingrese velocidad de juego:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+            velocidad.place(x=20, y=120)
+
+            velocidadEntry = Entry(canvas, width=3, font=fonts+str(20))
+            velocidadEntry.place(x=500, y=120)
+
+            paletaSize = Label(canvas, text="Ingrese largo de paleta:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+            paletaSize.place(x=20, y=200)
+
+            paletaEntry = Entry(canvas, width=3, font=fonts + str(20))
+            paletaEntry.place(x=450, y=200)
+
+            start = Button(canvas, text="Iniciar", font=fonts + str(20), fg=bgColor, bg=fgColor, borderwidth=0, command=star_game)
+            start.place(x=W1/2-50, y=400)
+
 
         # Funcion que abre la ventana de puntuaciones
         def mostrar_puntuaciones():
@@ -956,9 +1009,9 @@ def game_loop():
             if event.type == py.KEYDOWN and event.key == eval(return_key):
                 run_game = False
                 secs = 3
-            if event.type == py.KEYUP and event.key == py.K_p:
+            if event.type == py.KEYUP and event.key == eval(pause_key):
                 show_pause()
-            if event.type == py.KEYUP and event.key == py.K_m:
+            if event.type == py.KEYUP and event.key == eval(matrix_key):
                 if not matrix_running:
                     def star_matrix():
                         matrix_loop(M)
