@@ -823,10 +823,10 @@ def menu_loop():
             canvas_mostrar_scores.place(x=-1, y=0)
 
             label_mejores = Label(canvas_mostrar_scores, text="Mejores Puntuaciones:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            label_mejores.place(x=200, y=40)
+            label_mejores.place(x=180, y=130)
 
             canvas_tabla = Canvas(canvas_mostrar_scores, width=HW // 2, height=H2 // 2)
-            canvas_tabla.place(x=200, y=100)
+            canvas_tabla.place(x=210, y=190)
 
             cerrar_scores = Button(canvas_mostrar_scores, text="BACK!", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_mostrar_puntuciones)
             cerrar_scores.place(x=5, y=0)
@@ -896,15 +896,58 @@ def menu_loop():
 
     # Funcion abre la ventana de puntuaciones
     def puntuaciones(fgColor, bgColor, fonts):
-        def cerrar_puntuaciones():  # Funcion para cerrar ventana puntuacione
-            agregar_puntuaciones = open('Scores.txt', 'a')
-            agregar_puntuaciones.write(escribir_jugadores.get())
-            agregar_puntuaciones.write(';')
-            agregar_puntuaciones.write("su tiempo es " + str(int(secs)) + " segundos")
-            agregar_puntuaciones.write('\n')
-            agregar_puntuaciones.close()
+
+        # Funcion que convierte el archivo plano Scores.txt a una lista
+        def splitScores(a, L):
+            if a == L:
+                return ''
+            else:
+                scoresList[a] = scoresList[a].replace('\n', '').split(';')
+                return splitScores(a + 1, L)
+
+        scores = open('Scores.txt', 'r')
+        scoresList = scores.readlines()
+        scores.close()
+        splitScores(0, len(scoresList))
+        print(scoresList)
+
+        # Funcion para cerrar ventana puntuacione
+        def cerrar_puntuaciones():
+            jugador = escribir_jugadores.get()
+            tiempo = int(secs)
+            if revisarTop(scoresList, jugador, tiempo):
+                print(scoresList)
+                agregar_puntuaciones = open('Scores.txt', 'w')
+                agregar_puntuaciones.write(scoresList[0][0] + ';' + scoresList[0][1])
+                agregar_puntuaciones.write('\n')
+                agregar_puntuaciones.write(scoresList[1][0] + ';' + scoresList[1][1])
+                agregar_puntuaciones.write('\n')
+                agregar_puntuaciones.write(scoresList[2][0] + ';' + scoresList[2][1])
+                agregar_puntuaciones.write('\n')
+                agregar_puntuaciones.close()
             main.deiconify()
             ventana_scores.destroy()
+
+        # Funcion para revisar la lista y ordenar el top 3
+        def revisarTop(lista, jugador, tiempo):
+            if int(lista[0][1]) > tiempo:
+                record1 = lista[0]
+                record2 = lista[1]
+                lista[0] = [jugador, str(tiempo)]
+                lista[1] = record1
+                lista[2] = record2
+                return True
+            elif int(lista[1][1]) > tiempo:
+                tmp = lista[1]
+                lista[1][0] = jugador
+                lista[1][1] = str(tiempo)
+                lista[2][0] = tmp
+                return True
+            elif int(lista[2][1]) > tiempo:
+                lista[2][0] = jugador
+                lista[2][1] = str(tiempo)
+            else:
+                return False
 
         main.withdraw()
 
@@ -917,7 +960,7 @@ def menu_loop():
         canvas_scores = Canvas(ventana_scores, width=HW, height=HH, bg="black")
         canvas_scores.place(x=-1, y=0)
 
-        label_scores = Label(canvas_scores, text="Digite nombre de jugador:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+        label_scores = Label(canvas_scores, text="Digite iniciales del jugador:", font=fonts + str(20), fg=fgColor, bg=bgColor)
         label_scores.place(x=150, y=120)
 
         escribir_jugadores = Entry(canvas_scores, width=30)
