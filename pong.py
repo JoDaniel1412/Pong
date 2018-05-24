@@ -236,6 +236,8 @@ class Player(py.sprite.Sprite):
             large = 6
         if self.difficulty == 2:
             large = 3
+        if pallets_size > 0:
+            large = pallets_size
         return large
 
     # Metodo que obtiene las dimensiones de la paleta
@@ -482,9 +484,10 @@ class Ball(py.sprite.Sprite):
             self.kill()
             self.new_ball()
         if self.game.players == 0 and self.rect.right > W:  # Colision derecha en modo practica
-            self.set_xSpeed()
-            self.rect.right = W-1
             self.sound_effects[0].play()
+            self.set_xSpeed()
+            self.ySpeed = random.randrange(-angle_hit, angle_hit)
+            self.rect.right = W-1
 
 
 # Clase que crea la muros
@@ -950,7 +953,7 @@ def game_loop():
             if event.type == py.QUIT:
                 run_game = False
                 loop = False
-            if event.type == py.KEYDOWN and event.key == py.K_ESCAPE:
+            if event.type == py.KEYDOWN and event.key == eval(return_key):
                 run_game = False
                 secs = 3
             if event.type == py.KEYUP and event.key == py.K_p:
@@ -995,7 +998,7 @@ def game_loop():
             sound_effects[0].play()
             for element in balls:
                 element.set_xSpeed()
-                element.ySpeed = random.randrange(-5, 5)
+                element.ySpeed = random.randrange(-angle_hit, angle_hit)
 
         # Update
         sprites.update()
