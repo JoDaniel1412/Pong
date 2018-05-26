@@ -1,0 +1,77 @@
+4/5/2018; 
+	11pm a 3am:
+		Creo clases: Game, Player y Ball.
+		Creo el ciclo del juego.
+		Agrego teclas y comandos de movimiento Basico.
+
+5/5/2018; 
+	11am a 3:30pm:
+		Investigacion del manejo de Git.
+	3:30pm a 5pm:
+		Subo el progreso echo el dia anterior a Git.
+		Divido la paleta en segmentos para la colision
+	5pm a 9pm:
+		Trabajo en la interfaz del Menu en Tkinter.
+	10pm a 12pm:
+		Busco y cargo imagenes de prueba para paletas y bola.
+ 
+6/5/2018;
+	1pm a 3pm:
+		Modo doble paleta implementa.
+	4pm a 6:
+		Solucion de conflictos y arreglos en el orden del codigo.
+
+7/5/2018; 
+	12am a 1am:
+		Agrego imagenes y sonido para el estilo Neon y Baseball.
+	2pm a 5pm:
+		Incremento de velocida progresiva en la bola y paletas.
+		Implemento de animaciones a la bola.
+		Comprimo la musica.
+
+15/5/2018;
+	1pm a 3pm:
+		Convierto el formato de la musica de .wav a .ogg.
+		Mejoro el sistema de colisiones de los tres segmentos de la paleta.
+		Correxion de errores.
+		Cambio las canciones para el tema Clasico y Baseball.
+	3pm a 7pm:
+		Implemento de clase PowerUps y el arte.
+		Decidimos que esta clase no iba por buen camino y la cambiamos a la clase Muros.
+		Se trata de dividir el projecto en diferentes archivos .py, pero era muy tarde para corregirlo.
+	7pm a 11:30pm:
+		Creo la ventana de la matriz en Tkinter.
+
+16/5/2018;
+	10pm a 12:30am:
+		Correciones en la estructura del codigo y ortograficas.
+
+19/5/2018;
+	1pm a 2pm:
+		Comento partes del codigo sin comentar.
+	7pm a 10pm:
+		Mas comentarios y arreglos de la estructura del projecto.
+		Comprimios todo el audio, editando la musica y pasando a formato .ogg
+
+20/5/2018;
+	12 am a 5 pm:
+		Ajustes finales.
+		Borrador del diagrama de clases.
+		Recuperacion de la bitacora y bibliografia.
+
+
+Links:
+	Audio e Imagenes:
+		https://www.bfxr.net/
+		https://opengameart.org/
+	Tutoriales de YouTube:
+		https://www.youtube.com/playlist?list=PLsk-HSGFjnaH5yghzu7PcOzm9NhsW0Urw
+		https://www.youtube.com/watch?v=PGRhWuYjPdw&list=PLpOqH6AE0tNherBf6bzGiDM1uIy_E0WJH
+		https://www.youtube.com/channel/UCmKytNcli9AfEat665KqEeA/featured
+		https://www.youtube.com/watch?v=ujOTNg17LjI&list=PLQVvvaa0QuDdLkP8MrOXLe_rKuf6r80KO
+	Diagrama de Clases:
+		https://sketchboard.me/ZA1ntvuEPXzX
+	Otros:
+		https://www.pygame.org/docs/
+		https://stackoverflow.com/
+		
