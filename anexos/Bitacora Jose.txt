@@ -58,7 +58,27 @@
 		Ajustes finales.
 		Borrador del diagrama de clases.
 		Recuperacion de la bitacora y bibliografia.
+______________________________________________________________________________________
+27/5/2018:
+	3pm a 8pm:
+		Investigacion de posibles componentes para el control.
 
+25/5/2018:
+	2 pm a 5pm: 
+		Investigacion de sockets y creacion de archivos server.py y cliente.py.
+
+27/5/2018:
+	1 pm a 10pm:
+		Pruebas con arduino y cada sensor.
+	10pm a 12pm:
+		Modelo el control en Solid Works.
+
+28/5/2018:
+	1 pm a 4pm:
+		Hago diagrama electrico para control Atari.
+
+
+_______________________________________________________________________________________
 
 Links:
 	Audio e Imagenes:

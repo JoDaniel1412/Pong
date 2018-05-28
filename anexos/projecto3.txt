@@ -1,6 +1,0 @@
-botones	https://www.microjpm.com/products/a6-pcs-tactile-button-assortment/
-joystick	https://www.microjpm.com/products/joystick-ps2-shield-para-arduino/
-flora 9	https://www.microjpm.com/products/flora-9-dof-accelerometer-gyroscope-magnetometer-lsm9ds0-v1-0/
-flora gemma	 https://www.microjpm.com/products/adafruit-gemma-v2/
-contador	https://www.microjpm.com/products/display-led-7-segmentos-azul/
-volumen	https://www.microjpm.com/products/switch-rotativo-10-posiciones/
