@@ -11,7 +11,7 @@ loop = True
 run_game = True
 scores_game = False
 matrix_running = False
-run_lan = True
+run_lan = False
 tabla = []
 tiempo_funcion = time.time()
 py.mixer.init()
@@ -252,6 +252,7 @@ class Lan:
             message_b = self.message.encode('utf-8')
             self.sock.sendto(message_b, address)
             if self.receive == 'quit' or self.message == 'quit':
+                self.sock.sendto(b'quit', address)
                 run_game = False
                 self.sock.close()
                 print('Server stop')
@@ -274,6 +275,7 @@ class Lan:
             receive_b, address = self.sock.recvfrom(1024)
             self.receive = receive_b.decode('utf-8')
             if self.receive == 'quit' or self.message == 'quit':
+                self.sock.sendto(b'quit', self.host)
                 run_game = False
                 self.sock.close()
                 print('Client stop')
@@ -919,9 +921,11 @@ def menu_loop():
                 global Server
                 global players_selected
                 global run_game
+                global run_lan
                 Server = Lan('', 0)
                 players_selected = 3
                 run_game = True
+                run_lan = True
                 main.destroy()
 
             def star_client():  # Funcion que inicia el cliente
@@ -929,12 +933,14 @@ def menu_loop():
                 global Cliente
                 global players_selected
                 global run_game
+                global run_lan
 
                 ip = ipEntry.get()
                 ports = int(puertosEntry.get())
                 Cliente = Lan(ip, ports)
                 players_selected = 3
                 run_game = True
+                run_lan = True
                 main.destroy()
 
             main.withdraw()
@@ -1356,7 +1362,8 @@ def game_loop():
     for sprite in sprites:
         sprite.kill()
     py.quit()
-    run_lan = True
+    Server = None
+    Cliente = None
 
 
 # Controla los ciclos entre menu y juego
