@@ -26,12 +26,10 @@ angle_hit = 8
 starting_game_speed = 0
 pallets_size = 0
 
-# Server settings
-Local_ip = 'Neptune'
-
 # Game Keys
 player1_keys = ('py.K_w', 'py.K_s')
 player2_keys = ('py.K_UP', 'py.K_DOWN')
 return_key = 'py.K_ESCAPE'
 pause_key = 'py.K_p'
 matrix_key = 'py.K_m'
+switch_style = 'py.K_x'
