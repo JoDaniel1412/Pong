@@ -11,6 +11,7 @@ loop = True
 run_game = True
 scores_game = False
 matrix_running = False
+run_lan = True
 tabla = []
 tiempo_funcion = time.time()
 py.mixer.init()
@@ -243,34 +244,44 @@ class Lan:
 
     def server(self):  # Metodo para iniciar servidor
         global lanPallet
+        global run_game
         print('Server running, address: ' + str(self.ip) + '::' + str(self.port))
         while True:
             receive_b, address = self.sock.recvfrom(1024)
             self.receive = receive_b.decode('utf-8')
             message_b = self.message.encode('utf-8')
             self.sock.sendto(message_b, address)
+            if self.receive == 'quit' or self.message == 'quit':
+                run_game = False
+                self.sock.close()
+                print('Server stop')
+                break
             if self.receive != 'start':
                 receive_list = self.receive.replace('(', '').replace(')', '').replace(',', '').split(' ')
                 for n in receive_list:
                     self.data.append(int(n))
-                print(self.data)
                 lanPallet = self.data[0]
                 self.data = []
 
     def client(self):  # Metodo para iniciar cliente
         global lanBall
         global lanPallet
+        global run_game
         print('Client running, address: ' + str(self.ip) + '::' + str(self.port))
         while True:
             message_b = self.message.encode('utf-8')
             self.sock.sendto(message_b, self.host)
             receive_b, address = self.sock.recvfrom(1024)
             self.receive = receive_b.decode('utf-8')
+            if self.receive == 'quit' or self.message == 'quit':
+                run_game = False
+                self.sock.close()
+                print('Client stop')
+                break
             if self.receive != 'start':
                 receive_list = self.receive.replace('(', '').replace(')', '').replace(',', '').split(' ')
                 for n in receive_list:
                     self.data.append(int(n))
-                print(self.data)
                 lanPallet = self.data[0]
                 lanBall = self.data[1:3]
                 self.data = []
@@ -1169,6 +1180,7 @@ def game_loop():
     global Cliente
     global lanBall
     global lanPallet
+    global run_lan
     py.init()
     display = py.display.set_mode((W, H))
     py.display.set_caption('Pong')
@@ -1254,13 +1266,23 @@ def game_loop():
         for event in py.event.get():
             if event.type == py.QUIT:
                 run_game = False
+                run_lan = False
                 loop = False
+                if Server is not None:
+                    Server.set_message('quit')
+                if Cliente is not None:
+                    Cliente.set_message('quit')
             if event.type == py.KEYDOWN and event.key == eval(return_key):
                 run_game = False
+                run_lan = False
                 secs = 3
-            if event.type == py.KEYUP and event.key == eval(pause_key):
+                if Server is not None:
+                    Server.set_message('quit')
+                if Cliente is not None:
+                    Cliente.set_message('quit')
+            if event.type == py.KEYUP and event.key == eval(pause_key) and Cliente is None:
                 show_pause()
-            if event.type == py.KEYUP and event.key == eval(matrix_key):
+            if event.type == py.KEYUP and event.key == eval(matrix_key) and Cliente is None:
                 if not matrix_running:
                     def star_matrix():
                         matrix_loop(M)
@@ -1304,14 +1326,15 @@ def game_loop():
                 element.set_xSpeed()
                 element.ySpeed = random.randrange(-angle_hit, angle_hit)
 
-        # Update LAN messages
-        localPallet = players.get_sprite(0).get_y()
-        clientPallet = players.get_sprite(1).get_y()
-        localBall = balls.get_top_sprite().get_ball_center()
-        if Server is not None:
-            Server.set_message((localPallet, localBall))
-        if Cliente is not None:
-            Cliente.set_message((clientPallet, localBall))
+        if run_lan:
+            # Update LAN messages
+            localPallet = players.get_sprite(0).get_y()
+            clientPallet = players.get_sprite(1).get_y()
+            localBall = balls.get_top_sprite().get_ball_center()
+            if Server is not None:
+                Server.set_message((localPallet, localBall))
+            if Cliente is not None:
+                Cliente.set_message((clientPallet, localBall))
 
         # Update
         sprites.update()
@@ -1333,6 +1356,7 @@ def game_loop():
     for sprite in sprites:
         sprite.kill()
     py.quit()
+    run_lan = True
 
 
 # Controla los ciclos entre menu y juego
