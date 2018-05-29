@@ -10,3 +10,6 @@ En el menu de opciones se pueden ajustar todos los modos de juego
 
 Usamos la librerias de time, random, tkinter y pygame
 
+Creditos a autor
+<div>Icons made by <a href="https://www.flaticon.com/authors/prettycons" title="Computer">Computer</a> from <a href="https://www.flaticon.com/"     title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"     title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
+

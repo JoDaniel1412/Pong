@@ -21,6 +21,10 @@ players = py.sprite.Group()
 balls = py.sprite.Group()
 walls = py.sprite.Group()
 
+# Lan Variables
+Server = None
+Cliente = None
+
 
 # Clase usada para iniciar el juego con determinados ajustes
 # Instancias: cantidad de jugadores(1 o 2), cantidad de paletas(1 o 2), difficultad(0, 1 o 2), stylo del arte(0, 1, 2)
@@ -193,9 +197,9 @@ class Game:
 
 # Clase usada para establecer un servidor y cliente
 # Instancias: ip:str, port:int, message:list, host
-# Metodos: ajustar el mensaje, obtener datos, ajustar servidor o cliente
+# Metodos: ajustar el mensaje, obtener la direccion, obtener datos, ajustar servidor o cliente
 class Lan:
-    def __init__(self, ip, port, message, host=None):
+    def __init__(self, ip, port, message=None, host=None):
         self.ip = ip
         self.port = port
         self.message = message
@@ -203,6 +207,11 @@ class Lan:
         self.data = []
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         self.sock.bind((self.ip, self.port))
+        if self.host is None:
+            print('Server running, address: ' + str(self.ip) + '::' + str(self.port))
+
+    def get_address(self):
+        return self.ip, self.port
 
     def set_message(self, message):  # Metodo para ajustar el mensaje que se va a enviar
         self.message = message
@@ -595,6 +604,7 @@ def menu_loop():
     main.resizable(NO, NO)
     main.title('Pong')
     Fondo_pong = PhotoImage(file="img/Imagen de menu de pong.gif")
+    lan_icon = PhotoImage(file='img/lan_icon.png')
 
     # Inicia el juego en modo un jugador vs cpu
     def player1():
@@ -781,7 +791,7 @@ def menu_loop():
             global players_selected
             global run_game
 
-            def cerrar_practica():  # Funcion que cierra la ventana ajustes
+            def cerrar_practica():  # Funcion que cierra la ventana practica
                 ventana3.destroy()
                 main.deiconify()
 
@@ -835,6 +845,75 @@ def menu_loop():
 
             start = Button(canvas, text="Iniciar", font=fonts + str(20), fg=bgColor, bg=fgColor, borderwidth=0, command=star_game)
             start.place(x=W1/2-50, y=400)
+
+        # Inicia el juego en modo lan
+        def lan_mode():
+            def cerrar_lan():  # Funcion que cierra la ventana lan
+                ventanaLan.destroy()
+                main.deiconify()
+
+            def start_host():  # Funcion que inicia el sevidor
+                global Server
+                try:
+                    ports = int(puertosEntry.get())
+                    Server = Lan('', ports)
+                except:
+                    error = Label(canvas, text="Datos invalidos", font=fonts + str(16), fg='red', bg=bgColor)
+                    error.place(x=500, y=210)
+
+            def star_client():  # Funcion que inicia el cliente
+                global Server
+                global Cliente
+                try:
+                    ip = ipEntry.get()
+                    ports = int(puertosEntry.get())
+                    Cliente = Lan(ip, ports, host=Server.get_address())
+                except:
+                    error = Label(canvas, text="Servidor no encontrado", font=fonts + str(16), fg='red', bg=bgColor)
+                    error.place(x=500, y=210)
+
+            main.withdraw()
+
+            ventanaLan = Toplevel()
+            ventanaLan.title("Lan")
+
+            ventanaLan.minsize(W1, H1)
+            ventanaLan.resizable(width=NO, height=NO)
+
+            canvas = Canvas(ventanaLan, width=W1, height=H1, bg="black")
+            canvas.place(x=-1, y=0)
+
+            volver = Button(canvas, text="VOLVER", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_lan)
+            volver.place(x=10, y=10)
+
+            titulo = Label(canvas, text="LAN", font=fonts + str(40), fg=fgColor, bg=bgColor)
+            titulo.place(x=350, y=10)
+
+            ipLabel = Label(canvas, text="Ingrese ip de host:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+            ipLabel.place(x=20, y=120)
+
+            ipEntry = Entry(canvas, width=13, font=fonts+str(20))
+            ipEntry.place(x=400, y=120)
+
+            puertosLabel = Label(canvas, text="Ingrese puerto:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+            puertosLabel.place(x=20, y=200)
+
+            puertosEntry = Entry(canvas, width=5, font=fonts + str(20))
+            puertosEntry.place(x=400, y=200)
+
+            joinButton = Button(canvas, text="Unirse", font=fonts + str(20), fg=bgColor, bg=fgColor, borderwidth=0, command=star_client)
+            joinButton.place(x=W1/2-200, y=350)
+
+            hostButton = Button(canvas, text="Crear", font=fonts + str(20), fg=bgColor, bg=fgColor, borderwidth=0, command=start_host)
+            hostButton.place(x=W1 / 2+100, y=350)
+
+            infoText = '''Para crear una partida ingrese solamente 
+            un puerto entre 1025 y 9999, 
+            o si desea unirse a un juego 
+            ingrese la ip del host y puerto.'''
+
+            infoLabel = Label(canvas, text=infoText, justify=LEFT, font=fonts + str(17), fg=fgColor, bg=bgColor)
+            infoLabel.place(x=20, y=450)
 
         # Funcion que abre la ventana de puntuaciones
         def mostrar_puntuaciones():
@@ -932,6 +1011,9 @@ def menu_loop():
 
         practiceButton = Button(mainCanvas, text='Practicar', font=fonts+str(20), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command=practice_mode)
         practiceButton.place(x=xPoss + 20, y=yPoss + 540)
+
+        lanButton = Button(mainCanvas, image=lan_icon, borderwidth=2, command=lan_mode)
+        lanButton.place(x=xPoss + 720, y=yPoss + 530)
 
     # Funcion abre la ventana de puntuaciones
     def puntuaciones(fgColor, bgColor, fonts):
