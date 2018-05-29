@@ -1,8 +1,9 @@
+import pygame as py
 import random
 import time
+import socket
 from threading import Thread
 from tkinter import *
-import pygame as py
 from settings import *
 
 # Loop Variables
@@ -188,6 +189,38 @@ class Game:
         elif self.difficulty == 2:
             spawn_rate = 0.25
         return spawn_rate
+
+
+# Clase usada para establecer un servidor y cliente
+# Instancias: ip:str, port:int, message:list, host
+# Metodos: ajustar el mensaje, obtener datos, ajustar servidor o cliente
+class Lan:
+    def __init__(self, ip, port, message, host=None):
+        self.ip = ip
+        self.port = port
+        self.message = message
+        self.host = host
+        self.data = []
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        self.sock.bind((self.ip, self.port))
+
+    def set_message(self, message):  # Metodo para ajustar el mensaje que se va a enviar
+        self.message = message
+
+    def get_data(self):  # Metodo para obtener los datos recividos
+        return self.data
+
+    def server(self):  # Metodo para iniciar servidor
+        data, address = self.sock.recvfrom(1024)
+        self.data = data.decode('utf-8')
+        self.message = self.message.encode('utf-8')
+        self.sock.sendto(self.message, address)
+
+    def client(self):  # Metodo para iniciar cliente
+        self.message = self.message.encode('utf-8')
+        self.sock.sendto(self.message, self.host)
+        data, address = self.sock.recvfrom(1024)
+        self.data = data.decode('utf-8')
 
 
 # Funcion para dibujar textos
