@@ -24,6 +24,7 @@ walls = py.sprite.Group()
 # Lan Variables
 Server = None
 Cliente = None
+lanLista = (HW, HH)
 
 
 # Clase usada para iniciar el juego con determinados ajustes
@@ -108,6 +109,14 @@ class Game:
             sprites.add(humane2)
             players.add(humane1)
             players.add(humane2)
+
+        if self.players == 3:  # En caso de ser Local LAN
+            humane = Player(player1_keys, self.difficulty, poss1, self.matrix, [True, 'HUMANE'], images[0], self.pallets)
+            online = Player(player2_keys, self.difficulty, poss2, self.matrix, [True, 'ONLINE'], images[2], self.pallets)
+            sprites.add(humane)
+            sprites.add(online)
+            players.add(humane)
+            players.add(online)
         ball = Ball(self.difficulty, self.images[1], self)
         sprites.add(ball)
         balls.add(ball)
@@ -199,37 +208,43 @@ class Game:
 # Instancias: ip:str, port:int, message:list, host
 # Metodos: ajustar el mensaje, obtener la direccion, obtener datos, ajustar servidor o cliente
 class Lan:
-    def __init__(self, ip, port, message=None, host=None):
-        self.ip = ip
-        self.port = port
-        self.message = message
-        self.host = host
-        self.data = []
+    def __init__(self, ip, port):
+        self.message = ''
+        self.local = socket.gethostname()
+        self.host = (ip, port)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind((self.ip, self.port))
-        if self.host is None:
-            print('Server running, address: ' + str(self.ip) + '::' + str(self.port))
+        self.sock.bind((self.local, 0))
+        self.ip = self.sock.getsockname()[0]
+        self.port = self.sock.getsockname()[1]
+        self.data = []
+        print('Started, address: ' + str(self.ip) + ' :: ' + str(self.port))
 
     def get_address(self):
         return self.ip, self.port
 
     def set_message(self, message):  # Metodo para ajustar el mensaje que se va a enviar
-        self.message = message
+        self.message = str(message)
 
     def get_data(self):  # Metodo para obtener los datos recividos
         return self.data
 
     def server(self):  # Metodo para iniciar servidor
-        data, address = self.sock.recvfrom(1024)
-        self.data = data.decode('utf-8')
-        self.message = self.message.encode('utf-8')
-        self.sock.sendto(self.message, address)
+        print('Server running, address: ' + str(self.ip) + '::' + str(self.port))
+        while True:
+            self.data, address = self.sock.recvfrom(1024)
+            self.data = self.data.decode('utf-8')
+            print(self.data)
+            send = self.message.encode('utf-8')
+            self.sock.sendto(send, address)
 
     def client(self):  # Metodo para iniciar cliente
-        self.message = self.message.encode('utf-8')
-        self.sock.sendto(self.message, self.host)
-        data, address = self.sock.recvfrom(1024)
-        self.data = data.decode('utf-8')
+        global lanLista
+        print('Client running, address: ' + str(self.ip) + '::' + str(self.port))
+        while True:
+            send = self.message.encode('utf-8')
+            self.sock.sendto(send, self.host)
+            self.data, address = self.sock.recvfrom(1024)
+            self.data = self.data.decode('utf-8')
 
 
 # Funcion para dibujar textos
@@ -503,34 +518,37 @@ class Ball(py.sprite.Sprite):
     # Metodo que actualiza la posicion de la pelota en la pantalla
     def update(self):
         self.rotate()
-        self.rect.x += self.xSpeed
-        self.rect.y += self.ySpeed
-        if self.rect.top <= 0:  # Colision superior
-            self.ySpeed = -self.ySpeed
-            self.rect.top = 1
-            self.sound_effects[0].play().set_volume(volume)
-        if self.rect.bottom >= H:  # Colision inferior
-            self.ySpeed = -self.ySpeed
-            self.rect.bottom = H-1
-            self.sound_effects[0].play().set_volume(volume)
-        if self.rect.left < 0:  # Punto a la izquierda
-            self.sound_effects[1].play().set_volume(volume)
-            self.game.add_score2()
-            time.sleep(1)
-            self.kill()
-            self.new_ball()
-        if not self.game.players == 0 and self.rect.right > W:  # Punto a la derecha
-            sound = self.sound_effects[1].play()
-            sound.set_volume(volume)
-            self.game.add_score1()
-            time.sleep(1)
-            self.kill()
-            self.new_ball()
-        if self.game.players == 0 and self.rect.right > W:  # Colision derecha en modo practica
-            self.sound_effects[0].play().set_volume(volume)
-            self.set_xSpeed()
-            self.ySpeed = random.randrange(-angle_hit, angle_hit)
-            self.rect.right = W-1
+        if Cliente is not None and isinstance(lanLista, tuple):
+            self.rect.center = lanLista
+        else:
+            self.rect.x += self.xSpeed
+            self.rect.y += self.ySpeed
+            if self.rect.top <= 0:  # Colision superior
+                self.ySpeed = -self.ySpeed
+                self.rect.top = 1
+                self.sound_effects[0].play().set_volume(volume)
+            if self.rect.bottom >= H:  # Colision inferior
+                self.ySpeed = -self.ySpeed
+                self.rect.bottom = H-1
+                self.sound_effects[0].play().set_volume(volume)
+            if self.rect.left < 0:  # Punto a la izquierda
+                self.sound_effects[1].play().set_volume(volume)
+                self.game.add_score2()
+                time.sleep(1)
+                self.kill()
+                self.new_ball()
+            if not self.game.players == 0 and self.rect.right > W:  # Punto a la derecha
+                sound = self.sound_effects[1].play()
+                sound.set_volume(volume)
+                self.game.add_score1()
+                time.sleep(1)
+                self.kill()
+                self.new_ball()
+            if self.game.players == 0 and self.rect.right > W:  # Colision derecha en modo practica
+                self.sound_effects[0].play().set_volume(volume)
+                self.set_xSpeed()
+                self.ySpeed = random.randrange(-angle_hit, angle_hit)
+                self.rect.right = W-1
 
 
 # Clase que crea la muros
@@ -854,23 +872,25 @@ def menu_loop():
 
             def start_host():  # Funcion que inicia el sevidor
                 global Server
-                try:
-                    ports = int(puertosEntry.get())
-                    Server = Lan('', ports)
-                except:
-                    error = Label(canvas, text="Datos invalidos", font=fonts + str(16), fg='red', bg=bgColor)
-                    error.place(x=500, y=210)
+                global players_selected
+                global run_game
+                Server = Lan('', 0)
+                players_selected = 3
+                run_game = True
+                main.destroy()
 
             def star_client():  # Funcion que inicia el cliente
                 global Server
                 global Cliente
-                try:
-                    ip = ipEntry.get()
-                    ports = int(puertosEntry.get())
-                    Cliente = Lan(ip, ports, host=Server.get_address())
-                except:
-                    error = Label(canvas, text="Servidor no encontrado", font=fonts + str(16), fg='red', bg=bgColor)
-                    error.place(x=500, y=210)
+                global players_selected
+                global run_game
+
+                ip = ipEntry.get()
+                ports = int(puertosEntry.get())
+                Cliente = Lan(ip, ports)
+                players_selected = 2
+                run_game = True
+                main.destroy()
 
             main.withdraw()
 
@@ -907,9 +927,8 @@ def menu_loop():
             hostButton = Button(canvas, text="Crear", font=fonts + str(20), fg=bgColor, bg=fgColor, borderwidth=0, command=start_host)
             hostButton.place(x=W1 / 2+100, y=350)
 
-            infoText = '''Para crear una partida ingrese solamente 
-            un puerto entre 1025 y 9999, 
-            o si desea unirse a un juego 
+            infoText = '''Para crear una partida no ingrese nada,
+            si desea unirse a un juego 
             ingrese la ip del host y puerto.'''
 
             infoLabel = Label(canvas, text=infoText, justify=LEFT, font=fonts + str(17), fg=fgColor, bg=bgColor)
@@ -1112,15 +1131,46 @@ def game_loop():
     global run_game
     global starting_game_speed
     global pallets_size
-    time1 = time.time()
+    global Server
+    global Cliente
+    global lanLista
     py.init()
     display = py.display.set_mode((W, H))
     py.display.set_caption('Pong')
     clock = py.time.Clock()
 
+    # Funcion que mantiene en espera el juego en LAN mientras alguien se une
+    def waiting_screen():
+        global run_game
+        global loop
+        global Cliente
+        while Server.get_data() != '':
+            clock.tick(FPS)
+            for events in py.event.get():
+                if events.type == py.QUIT:
+                    Cliente = False
+                    run_game = False
+                    loop = False
+                if events.type == py.KEYUP:
+                    Cliente = False
+
+            # Dibujar textos durante la espera
+            draw_text(display, "Esperando jugador...", (HW, H * 3 / 8), ("Arial", 64, white))
+            py.display.update()
+
+    # Lan
+    if Server is not None:
+        lan1 = Thread(target=Server.server)
+        lan1.start()
+        waiting_screen()
+    if Cliente is not None:
+        lan2 = Thread(target=Cliente.client)
+        lan2.start()
+
     # Inicia la Clase Game
     game = Game(players_selected, pallets_selected, difficulty_selected, style_selected, walls_able)
     game.start_game()
+    time1 = time.time()
 
     # Cargar fondo, sonidos y otros
     back_grounds = game.load_images()[2]
@@ -1159,7 +1209,6 @@ def game_loop():
             # Dibujar textos durante la pausa
             draw_text(display, "PAUSA", (HW, H*3/8), ("Arial", 64, white))
             draw_text(display, "Presione cualquiere tecla para continuar", (HW, H*5/8), ("Arial", 22, white))
-
             py.display.update()
 
     # Game loop
@@ -1221,6 +1270,13 @@ def game_loop():
                 element.ySpeed = random.randrange(-angle_hit, angle_hit)
 
         # Update
+        if Server is not None:
+            Server.set_message(lanLista)
+            for ball in balls:
+                lanLista = ball.get_ball_center()
+        if Cliente is not None:
+            Cliente.set_message('a')
+
         sprites.update()
         game_scores = game.get_scores()
         music.set_volume(volume)
