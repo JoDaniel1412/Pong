@@ -25,7 +25,7 @@ walls = py.sprite.Group()
 Server = None
 Cliente = None
 lanBall = (HW, HH)
-lanPallet = 300
+lanPallet = 800
 
 
 # Clase usada para iniciar el juego con determinados ajustes
@@ -112,12 +112,20 @@ class Game:
             players.add(humane2)
 
         if self.players == 3:  # En caso de ser Local LAN
-            humane = Player(player1_keys, self.difficulty, poss1, self.matrix, [True, 'HUMANE'], images[0], self.pallets)
-            online = Player(player2_keys, self.difficulty, poss2, self.matrix, [True, 'ONLINE'], images[2], self.pallets)
-            sprites.add(online)
-            sprites.add(humane)
-            players.add(online)
-            players.add(humane)
+            if Cliente is not None:
+                humane = Player(player1_keys, self.difficulty, poss2, self.matrix, [True, 'HUMANE'], images[0], self.pallets)
+                online = Player('', self.difficulty, poss1, self.matrix, [True, 'ONLINE'], images[2], self.pallets)
+                sprites.add(online)
+                sprites.add(humane)
+                players.add(online)
+                players.add(humane)
+            if Cliente is None:
+                humane = Player(player1_keys, self.difficulty, poss1, self.matrix, [True, 'HUMANE'], images[0], self.pallets)
+                online = Player('', self.difficulty, poss2, self.matrix, [True, 'ONLINE'], images[2], self.pallets)
+                sprites.add(humane)
+                sprites.add(online)
+                players.add(humane)
+                players.add(online)
         ball = Ball(self.difficulty, self.images[1], self)
         sprites.add(ball)
         balls.add(ball)
@@ -211,6 +219,7 @@ class Game:
 class Lan:
     def __init__(self, ip, port):
         self.message = 'start'
+        self.receive = ''
         self.local = socket.gethostname()
         self.host = (ip, port)
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -229,19 +238,22 @@ class Lan:
     def get_data(self):  # Metodo para obtener los datos recividos
         return self.data
 
+    def get_receive(self):
+        return self.receive
+
     def server(self):  # Metodo para iniciar servidor
         global lanPallet
         print('Server running, address: ' + str(self.ip) + '::' + str(self.port))
         while True:
             receive_b, address = self.sock.recvfrom(1024)
-            self.data = receive_b.decode('utf-8')
+            self.receive = receive_b.decode('utf-8')
             message_b = self.message.encode('utf-8')
             self.sock.sendto(message_b, address)
-            print(self.data)
-            if self.data != 'start':
-                receive_list = self.message.replace('(', '').replace(')', '').replace(',', '').split(' ')
+            if self.receive != 'start':
+                receive_list = self.receive.replace('(', '').replace(')', '').replace(',', '').split(' ')
                 for n in receive_list:
                     self.data.append(int(n))
+                print(self.data)
                 lanPallet = self.data[0]
                 self.data = []
 
@@ -253,12 +265,12 @@ class Lan:
             message_b = self.message.encode('utf-8')
             self.sock.sendto(message_b, self.host)
             receive_b, address = self.sock.recvfrom(1024)
-            self.data = receive_b.decode('utf-8')
-            print(self.data)
-            if self.data != 'start':
-                receive_list = self.message.replace('(', '').replace(')', '').replace(',', '').split(' ')
+            self.receive = receive_b.decode('utf-8')
+            if self.receive != 'start':
+                receive_list = self.receive.replace('(', '').replace(')', '').replace(',', '').split(' ')
                 for n in receive_list:
                     self.data.append(int(n))
+                print(self.data)
                 lanPallet = self.data[0]
                 lanBall = self.data[1:3]
                 self.data = []
@@ -534,27 +546,27 @@ class Ball(py.sprite.Sprite):
 
     # Metodo que crea una bola cada vez que se anota un punto
     def new_ball(self):
-        newBall = Ball(self.difficulty, self.original_image, self.game)
-        sprites.add(newBall)
-        balls.add(newBall)
+        self.rect.center = HW, HH
+        self.set_speed()
+        self.xSpeed = random.choice(self.speed)
+        self.ySpeed = random.choice(self.speed)
 
     # Metodo que actualiza la posicion de la pelota en la pantalla
     def update(self):
         self.rotate()
         if Cliente is not None:  # En caso de modo LAN
             self.rect.center = lanBall
-            if not self.game.players == 0 and self.rect.right > W:  # Punto a la derecha
-                sound = self.sound_effects[1].play()
-                sound.set_volume(volume)
-                self.game.add_score1()
-                time.sleep(1)
-                self.kill()
-                self.new_ball()
-            if self.game.players == 0 and self.rect.right > W:  # Colision derecha en modo practica
-                self.sound_effects[0].play().set_volume(volume)
-                self.set_xSpeed()
-                self.ySpeed = random.randrange(-angle_hit, angle_hit)
-                self.rect.right = W - 1
+        if self.rect.left < 0:  # Punto a la izquierda
+            self.sound_effects[1].play().set_volume(volume)
+            self.game.add_score2()
+            time.sleep(1)
+            self.new_ball()
+        if not self.game.players == 0 and self.rect.right > W:  # Punto a la derecha
+            sound = self.sound_effects[1].play()
+            sound.set_volume(volume)
+            self.game.add_score1()
+            time.sleep(1)
+            self.new_ball()
         else:  # En caso de juego Local
             self.rect.x += self.xSpeed
             self.rect.y += self.ySpeed
@@ -566,19 +578,6 @@ class Ball(py.sprite.Sprite):
                 self.ySpeed = -self.ySpeed
                 self.rect.bottom = H-1
                 self.sound_effects[0].play().set_volume(volume)
-            if self.rect.left < 0:  # Punto a la izquierda
-                self.sound_effects[1].play().set_volume(volume)
-                self.game.add_score2()
-                time.sleep(1)
-                self.kill()
-                self.new_ball()
-            if not self.game.players == 0 and self.rect.right > W:  # Punto a la derecha
-                sound = self.sound_effects[1].play()
-                sound.set_volume(volume)
-                self.game.add_score1()
-                time.sleep(1)
-                self.kill()
-                self.new_ball()
             if self.game.players == 0 and self.rect.right > W:  # Colision derecha en modo practica
                 self.sound_effects[0].play().set_volume(volume)
                 self.set_xSpeed()
@@ -923,7 +922,7 @@ def menu_loop():
                 ip = ipEntry.get()
                 ports = int(puertosEntry.get())
                 Cliente = Lan(ip, ports)
-                players_selected = 2
+                players_selected = 3
                 run_game = True
                 main.destroy()
 
@@ -1180,7 +1179,7 @@ def game_loop():
         global run_game
         global loop
         global Cliente
-        while Server.get_data() != 'start':
+        while Server.get_receive() != 'start':
             clock.tick(FPS)
             for events in py.event.get():
                 if events.type == py.QUIT:
@@ -1309,11 +1308,10 @@ def game_loop():
         localPallet = players.get_sprite(0).get_y()
         clientPallet = players.get_sprite(1).get_y()
         localBall = balls.get_top_sprite().get_ball_center()
-        print(localPallet, clientPallet, localBall)
         if Server is not None:
-            Server.set_message((localBall, localPallet))
+            Server.set_message((localPallet, localBall))
         if Cliente is not None:
-            Cliente.set_message((localBall, localPallet))
+            Cliente.set_message((clientPallet, localBall))
 
         # Update
         sprites.update()
