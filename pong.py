@@ -35,7 +35,8 @@ lanPallet = 800
 run_arduino = False
 # noinspection PyBroadException
 try:  # Trata de iniciar la conexion de Arduino
-    ser = serial.Serial('COM6', 9600, timeout=0)
+    ser = serial.Serial('COM3', 9600, timeout=0)
+    print('Arduino Running')
     run_arduino = True
 except:
     pass
@@ -1296,11 +1297,13 @@ def game_loop():
             try:
                 entrada = str(ser.readline())
                 datos = entrada[entrada.index("'") + 1: entrada.index("\\")]
+                print(datos)
+                player1 = players.get_sprite(0)
                 if datos == "w":
-                    # move_pallet_up()
+                    player1.move_pallet_up()
                     pass
-                elif datos == "s":
-                    # move_pallet_down()
+                if datos == "s":
+                    player1.move_pallet_down()
                     pass
             except:
                 pass
@@ -1392,7 +1395,7 @@ def game_loop():
                 element.set_xSpeed()
                 element.ySpeed = random.randrange(-angle_hit, angle_hit)
 
-        # Mensajes del Servidor-Cliente
+        # LAN mensajes del Servidor-Cliente
         if run_lan:
             localPallet = players.get_sprite(0).get_y()
             clientPallet = players.get_sprite(1).get_y()
