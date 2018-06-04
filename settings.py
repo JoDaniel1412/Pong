@@ -13,7 +13,7 @@ W2, H2 = 320, 870
 HW, HH = W // 2, H // 2
 FPS = 60
 secs = 3
-volume = 0.1
+volume = 1
 
 # Default Game Settings
 pallets_selected = 1
@@ -21,7 +21,7 @@ difficulty_selected = 1
 style_selected = 0
 players_selected = 1
 walls_able = 0
-top_points = 10
+top_points = 5
 angle_hit = 8
 starting_game_speed = 0
 pallets_size = 0

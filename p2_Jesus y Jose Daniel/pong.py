@@ -1,48 +1,55 @@
-import pygame as py
 import random
 import time
-import socket
-import serial
 from threading import Thread
 from tkinter import *
-from settings import *
-ser = serial.Serial('COM6', 9600, timeout=0)
+import pygame as py
 
-# Loop Variables
-pause = False
+# Colors
+black = (0, 0, 0)
+white = (255, 255, 255)
+red = (255, 0, 0)
+green = (0, 255, 0)
+blue = (0, 0, 255)
+yellow = (255, 255, 0)
+
+# Variables
+W, H = 1400, 800
+W1, H1 = 800, 600
+W2, H2 = 320, 870
+HW, HH = W // 2, H // 2
+FPS = 60
+secs = 3
 loop = True
 run_game = True
-scores_game = False
+end_game = False
 matrix_running = False
-run_lan = False
 tabla = []
 tiempo_funcion = time.time()
+
+# Default Game Variables
+pallets_selected = 1
+difficulty_selected = 1
+style_selected = 0
+players_selected = 1
+top_points = 5
 py.mixer.init()
-datos2 = 550
 
 # Sprite Groups
 sprites = py.sprite.Group()
-players = py.sprite.LayeredUpdates()
-balls = py.sprite.LayeredUpdates()
+players = py.sprite.Group()
+balls = py.sprite.Group()
 walls = py.sprite.Group()
-
-# Lan Variables
-Server = None
-Cliente = None
-lanBall = (HW, HH)
-lanPallet = 800
 
 
 # Clase usada para iniciar el juego con determinados ajustes
 # Instancias: cantidad de jugadores(1 o 2), cantidad de paletas(1 o 2), difficultad(0, 1 o 2), stylo del arte(0, 1, 2)
-# Metodos: crear y obtener la mtatriz, iniciar el juego, cargwar imagenes, sonidos, dibujar puntaje y frecuencia de muros
+# Metodos: crear y obtener la mtatriz, iniciar el juego, cargar imagenes, sonidos, dibujar puntaje y frecuencia de muros
 class Game:
-    def __init__(self, player, pallets, difficulty, style, wall):
+    def __init__(self, player, pallets, difficulty, style):
         self.players = player
         self.pallets = pallets
         self.difficulty = difficulty
         self.style = style
-        self.wall = wall
         self.images = self.load_images()
         self.sound_effects = self.load_sounds()
         self.matrix = []
@@ -68,20 +75,13 @@ class Game:
 
     # Metodo para iniciar el juego
     def start_game(self):
+        player1_keys = ('py.K_w', 'py.K_s')
+        player2_keys = ('py.K_UP', 'py.K_DOWN')
         images = self.images[0]
         poss1 = 38
         poss2 = 1026
         poss3 = poss1 + 7
         poss4 = poss2 + 5
-        if self.players == 0:  # En caso de ser modo practica
-            if self.pallets == 2:
-                poss1 -= 4
-                humane2 = Player(player1_keys, self.difficulty, poss3, self.matrix, [True, 'HUMANE'], images[1], self.pallets)
-                sprites.add(humane2)
-                players.add(humane2)
-            humane = Player(player1_keys, self.difficulty, poss1, self.matrix, [True, 'HUMANE'], images[0], self.pallets)
-            sprites.add(humane)
-            players.add(humane)
         if self.players == 1:  # En caso de ser un jugador
             if self.pallets == 2:
                 poss1 -= 4
@@ -115,22 +115,6 @@ class Game:
             sprites.add(humane2)
             players.add(humane1)
             players.add(humane2)
-
-        if self.players == 3:  # En caso de ser Local LAN
-            if Cliente is not None:
-                humane = Player(player1_keys, self.difficulty, poss2, self.matrix, [True, 'HUMANE'], images[0], self.pallets)
-                online = Player('', self.difficulty, poss1, self.matrix, [True, 'ONLINE'], images[2], self.pallets)
-                sprites.add(online)
-                sprites.add(humane)
-                players.add(online)
-                players.add(humane)
-            if Cliente is None:
-                humane = Player(player1_keys, self.difficulty, poss1, self.matrix, [True, 'HUMANE'], images[0], self.pallets)
-                online = Player('', self.difficulty, poss2, self.matrix, [True, 'ONLINE'], images[2], self.pallets)
-                sprites.add(humane)
-                sprites.add(online)
-                players.add(humane)
-                players.add(online)
         ball = Ball(self.difficulty, self.images[1], self)
         sprites.add(ball)
         balls.add(ball)
@@ -218,81 +202,6 @@ class Game:
         return spawn_rate
 
 
-# Clase usada para establecer un servidor y cliente
-# Instancias: ip:str, port:int, message:list, host
-# Metodos: ajustar el mensaje, obtener la direccion, obtener datos, ajustar servidor o cliente
-class Lan:
-    def __init__(self, ip, port):
-        self.message = 'start'
-        self.receive = ''
-        self.local = socket.gethostname()
-        self.host = (ip, port)
-        self.sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        self.sock.bind((self.local, 0))
-        self.ip = self.sock.getsockname()[0]
-        self.port = self.sock.getsockname()[1]
-        self.data = []
-        print('Local: ' + str(self.ip) + ' :: ' + str(self.port))
-
-    def get_address(self):
-        return self.ip, self.port
-
-    def set_message(self, message):  # Metodo para ajustar el mensaje que se va a enviar
-        self.message = str(message)
-
-    def get_data(self):  # Metodo para obtener los datos recividos
-        return self.data
-
-    def get_receive(self):
-        return self.receive
-
-    def server(self):  # Metodo para iniciar servidor
-        global lanPallet
-        global run_game
-        print('Server running, address: ' + str(self.ip) + '::' + str(self.port))
-        while True:
-            receive_b, address = self.sock.recvfrom(1024)
-            self.receive = receive_b.decode('utf-8')
-            message_b = self.message.encode('utf-8')
-            self.sock.sendto(message_b, address)
-            if self.receive == 'quit' or self.message == 'quit':
-                self.sock.sendto(b'quit', address)
-                run_game = False
-                self.sock.close()
-                print('Server stop')
-                break
-            if self.receive != 'start':
-                receive_list = self.receive.replace('(', '').replace(')', '').replace(',', '').split(' ')
-                for n in receive_list:
-                    self.data.append(int(n))
-                lanPallet = self.data[0]
-                self.data = []
-
-    def client(self):  # Metodo para iniciar cliente
-        global lanBall
-        global lanPallet
-        global run_game
-        print('Client running, address: ' + str(self.ip) + '::' + str(self.port))
-        while True:
-            message_b = self.message.encode('utf-8')
-            self.sock.sendto(message_b, self.host)
-            receive_b, address = self.sock.recvfrom(1024)
-            self.receive = receive_b.decode('utf-8')
-            if self.receive == 'quit' or self.message == 'quit':
-                self.sock.sendto(b'quit', self.host)
-                run_game = False
-                self.sock.close()
-                print('Client stop')
-                break
-            if self.receive != 'start':
-                receive_list = self.receive.replace('(', '').replace(')', '').replace(',', '').split(' ')
-                for n in receive_list:
-                    self.data.append(int(n))
-                lanPallet = self.data[0]
-                lanBall = self.data[1:3]
-                self.data = []
-
-
 # Funcion para dibujar textos
 def draw_text(surf, text, poss, font):
     font_type = py.font.match_font(font[0])
@@ -323,11 +232,6 @@ class Player(py.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = self.matrix[self.poss]
         self.speed_limit = 40
-        self.adjust_speed()
-
-    # Metodo que retorna la posicion de la paleta
-    def get_y(self):
-        return self.rect.y
 
     # Metodo que retorna una lista con los segmentos de la paleta
     def pallet_segments(self):
@@ -343,16 +247,7 @@ class Player(py.sprite.Sprite):
             large = 6
         if self.difficulty == 2:
             large = 3
-        if pallets_size > 0:
-            large = pallets_size
         return large
-
-    # Metodo que mueve la paleta
-    def move_pallet_up(self):
-            self.rect.y -= self.speed
-
-    def move_pallet_down(self):
-            self.rect.y += self.speed
 
     # Metodo que obtiene las dimensiones de la paleta
     def get_pallet_size(self):
@@ -369,13 +264,6 @@ class Player(py.sprite.Sprite):
             speed = 15
         return speed
 
-    # Metodo que ajusta la velocidad de la paleta en modo practica
-    def adjust_speed(self):
-        if starting_game_speed > 0:
-            self.speed = starting_game_speed * 3/4
-            if self.speed > self.speed_limit:
-                self.speed = self.speed_limit
-
     # Metodo para aumentar la velocidad progresivamente
     def increase_xSpeed(self):
         if self.speed_limit > self.speed > 0:
@@ -383,10 +271,9 @@ class Player(py.sprite.Sprite):
         if -self.speed_limit < self.speed < 0:
             self.speed -= 1
 
-    # Metodo para reiniciar la velocidad
+    # Metodo par reiniciar la velocidad
     def reset_speed(self):
-        if starting_game_speed == 0:
-            self.speed = self.default_speed
+        self.speed = self.default_speed
 
     # Metodo para obtener el estado de la paleta
     def set_status(self, boolean):
@@ -448,12 +335,10 @@ class Player(py.sprite.Sprite):
 
         # En caso de ser una paleta
         else:
-            if self.status[0] and self.status[1] == 'ONLINE':  # Ajusta movimiento del jugador en LAN
-                self.rect.y = lanPallet
             if self.status[0] and self.status[1] == 'HUMANE':  # Ajusta movimiento del jugador
-                if (k[eval(self.keys[0])] or datos2 > 600) and self.rect.top > 0:
+                if k[eval(self.keys[0])] and self.rect.top > 0:
                     self.rect.y -= self.speed
-                if (k[eval(self.keys[1])] or datos2 < 500) and self.rect.bottom < H:
+                if k[eval(self.keys[1])] and self.rect.bottom < H:
                     self.rect.y += self.speed
             if self.status[0] and self.status[1] == 'CPU':  # Ajusta movimiento del cpu y dificultad
                 tiempo3 = time.time()
@@ -489,7 +374,6 @@ class Ball(py.sprite.Sprite):
         self.ySpeed = random.choice(self.speed)
         self.sound_effects = game.get_sound_effects()
         self.speed_limit = 50
-        self.adjust_speed()
         self.rotation_speed = 7
         self.last_rotation = 0
 
@@ -550,13 +434,6 @@ class Ball(py.sprite.Sprite):
             speed_range = [-10, 10]
         return speed_range
 
-    # Metodo que ajusta la velocidad de la pelota en modo practica
-    def adjust_speed(self):
-        if starting_game_speed > 0:
-            self.xSpeed = starting_game_speed
-            if self.xSpeed > self.speed_limit:
-                self.xSpeed = self.speed_limit
-
     # Metodo que ajusta el radio de la bola segun dificultad
     def set_size(self):
         ball_size = 0
@@ -570,43 +447,35 @@ class Ball(py.sprite.Sprite):
 
     # Metodo que crea una bola cada vez que se anota un punto
     def new_ball(self):
-        self.rect.center = HW, HH
-        self.set_speed()
-        self.xSpeed = random.choice(self.speed)
-        self.ySpeed = random.choice(self.speed)
+        newBall = Ball(self.difficulty, self.original_image, self.game)
+        sprites.add(newBall)
+        balls.add(newBall)
 
     # Metodo que actualiza la posicion de la pelota en la pantalla
     def update(self):
         self.rotate()
-        if Cliente is not None:  # En caso de modo LAN
-            self.rect.center = lanBall
-        if self.rect.left < 0:  # Punto a la izquierda
-            self.sound_effects[1].play().set_volume(volume)
+        self.rect.x += self.xSpeed
+        self.rect.y += self.ySpeed
+        if self.rect.top <= 0:
+            self.ySpeed = -self.ySpeed
+            self.rect.top = 1
+            self.sound_effects[0].play()
+        if self.rect.bottom >= H:
+            self.ySpeed = -self.ySpeed
+            self.rect.bottom = H-1
+            self.sound_effects[0].play()
+        if self.rect.left < 0:
+            self.sound_effects[1].play()
             self.game.add_score2()
             time.sleep(1)
+            self.kill()
             self.new_ball()
-        if not self.game.players == 0 and self.rect.right > W:  # Punto a la derecha
-            sound = self.sound_effects[1].play()
-            sound.set_volume(volume)
+        if self.rect.right > W:
+            self.sound_effects[1].play()
             self.game.add_score1()
             time.sleep(1)
+            self.kill()
             self.new_ball()
-        else:  # En caso de juego Local
-            self.rect.x += self.xSpeed
-            self.rect.y += self.ySpeed
-            if self.rect.top <= 0:  # Colision superior
-                self.ySpeed = -self.ySpeed
-                self.rect.top = 1
-                self.sound_effects[0].play().set_volume(volume)
-            if self.rect.bottom >= H:  # Colision inferior
-                self.ySpeed = -self.ySpeed
-                self.rect.bottom = H-1
-                self.sound_effects[0].play().set_volume(volume)
-            if self.game.players == 0 and self.rect.right > W:  # Colision derecha en modo practica
-                self.sound_effects[0].play().set_volume(volume)
-                self.set_xSpeed()
-                self.ySpeed = random.randrange(-angle_hit, angle_hit)
-                self.rect.right = W-1
 
 
 # Clase que crea la muros
@@ -680,7 +549,6 @@ def menu_loop():
     main.resizable(NO, NO)
     main.title('Pong')
     Fondo_pong = PhotoImage(file="img/Imagen de menu de pong.gif")
-    lan_icon = PhotoImage(file='img/lan_icon.png')
 
     # Inicia el juego en modo un jugador vs cpu
     def player1():
@@ -781,19 +649,6 @@ def menu_loop():
                 top_points = 10
                 top_points10['bg'], top_points10['fg'] = fgColor, bgColor
                 top_points5['bg'], top_points5['fg'] = bgColor, fgColor
-
-            # Configura si desea jugar con obstaculos
-            def activate_walls():
-                global walls_able
-                if walls_able == 0:
-                    walls_able = 1
-                    activa_muros['text'] = 'Activos'
-                    activa_muros['bg'], activa_muros['fg'] = fgColor, bgColor
-                else:
-                    walls_able = 0
-                    activa_muros['text'] = 'Desactivados'
-                    activa_muros['bg'], activa_muros['fg'] = bgColor, fgColor
-
             main.withdraw()
 
             ventana2 = Toplevel()
@@ -820,26 +675,26 @@ def menu_loop():
             dificil = Button(canvas2, text="Dificil", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=hard)
             dificil.place(x=50, y=510)
 
-            top_points = Label(canvas2, text="Seleccione Puntos:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            top_points.place(x=460, y=300)
+            top_points = Label(canvas2, text="Puntos Maximos:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+            top_points.place(x=460, y=360)
 
             top_points5 = Button(canvas2, text="5 Puntos", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=puntaje5)
-            top_points5.place(x=500, y=340)
+            top_points5.place(x=500, y=400)
 
             top_points10 = Button(canvas2, text="10 Puntos", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=puntaje10)
-            top_points10.place(x=500, y=390)
+            top_points10.place(x=500, y=450)
 
             paletas = Label(canvas2, text="Seleccione paletas:", font=fonts + str(20), fg=fgColor, bg=bgColor)
             paletas.place(x=460, y=120)
 
             una_paleta = Button(canvas2, text="Una paleta", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=pallets_select1)
-            una_paleta.place(x=500, y=160)
+            una_paleta.place(x=500, y=180)
 
             dos_paletas = Button(canvas2, text="Dos paletas", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=pallets_select2)
-            dos_paletas.place(x=500, y=220)
+            dos_paletas.place(x=500, y=240)
 
-            escenario = Label(canvas2, text="Seleccione escenario:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            escenario.place(x=20, y=120)
+            escenario = Label(canvas2, text="Escoja escenario:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+            escenario.place(x=40, y=120)
 
             clasico = Button(canvas2, text="Clasico", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=default_set)
             clasico.place(x=50, y=160)
@@ -850,151 +705,11 @@ def menu_loop():
             futbol = Button(canvas2, text="Baseball", font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=baseball_set)
             futbol.place(x=50, y=260)
 
-            muros = Label(canvas2, text="Seleccione Muros:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            muros.place(x=460, y=480)
-
-            activa_muros = Button(canvas2, text='Desactivados', font=fonts + str(20), fg=fgColor, bg=bgColor, borderwidth=0, command=activate_walls)
-            activa_muros.place(x=500, y=520)
-
             aceptar_ajustes = Button(canvas2, text="LISTO!", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_ajustes)
             aceptar_ajustes.place(x=670, y=10)
 
             volver = Button(canvas2, text="VOLVER", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_ajustes)
             volver.place(x=10, y=10)
-
-        # Inicia el juego en modo practica
-        def practice_mode():
-            global players_selected
-            global run_game
-
-            def cerrar_practica():  # Funcion que cierra la ventana practica
-                ventana3.destroy()
-                main.deiconify()
-
-            def star_game():  # Funcion que inicia el juego
-                global run_game
-                global players_selected
-                global starting_game_speed
-                global pallets_size
-                velocida = velocidadEntry.get()
-                largo = paletaEntry.get()
-                try:
-                    starting_game_speed = int(velocida)
-                    pallets_size = int(largo)
-                    if pallets_size > 12:
-                        pallets_size = 12
-                    players_selected = 0
-                    run_game = True
-                    main.destroy()
-                except:
-                    error = Label(canvas, text="Debe ingresar numeros enteros", font=fonts + str(10), fg='red', bg=bgColor)
-                    error.place(x=450, y=250)
-
-            main.withdraw()
-
-            ventana3 = Toplevel()
-            ventana3.title("Practica")
-
-            ventana3.minsize(W1, H1)
-            ventana3.resizable(width=NO, height=NO)
-
-            canvas = Canvas(ventana3, width=W1, height=H1, bg="black")
-            canvas.place(x=-1, y=0)
-
-            volver = Button(canvas, text="VOLVER", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_practica)
-            volver.place(x=10, y=10)
-
-            practica = Label(canvas, text="Practica", font=fonts + str(40), fg=fgColor, bg=bgColor)
-            practica.place(x=290, y=10)
-
-            velocidad = Label(canvas, text="Ingrese velocidad de juego:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            velocidad.place(x=20, y=120)
-
-            velocidadEntry = Entry(canvas, width=3, font=fonts+str(20))
-            velocidadEntry.place(x=500, y=120)
-
-            paletaSize = Label(canvas, text="Ingrese largo de paleta:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            paletaSize.place(x=20, y=200)
-
-            paletaEntry = Entry(canvas, width=3, font=fonts + str(20))
-            paletaEntry.place(x=450, y=200)
-
-            start = Button(canvas, text="Iniciar", font=fonts + str(20), fg=bgColor, bg=fgColor, borderwidth=0, command=star_game)
-            start.place(x=W1/2-50, y=400)
-
-        # Inicia el juego en modo lan
-        def lan_mode():
-            def cerrar_lan():  # Funcion que cierra la ventana lan
-                ventanaLan.destroy()
-                main.deiconify()
-
-            def start_host():  # Funcion que inicia el sevidor
-                global Server
-                global players_selected
-                global run_game
-                global run_lan
-                Server = Lan('', 0)
-                players_selected = 3
-                run_game = True
-                run_lan = True
-                main.destroy()
-
-            def star_client():  # Funcion que inicia el cliente
-                global Server
-                global Cliente
-                global players_selected
-                global run_game
-                global run_lan
-
-                ip = ipEntry.get()
-                ports = int(puertosEntry.get())
-                Cliente = Lan(ip, ports)
-                players_selected = 3
-                run_game = True
-                run_lan = True
-                main.destroy()
-
-            main.withdraw()
-
-            ventanaLan = Toplevel()
-            ventanaLan.title("Lan")
-
-            ventanaLan.minsize(W1, H1)
-            ventanaLan.resizable(width=NO, height=NO)
-
-            canvas = Canvas(ventanaLan, width=W1, height=H1, bg="black")
-            canvas.place(x=-1, y=0)
-
-            volver = Button(canvas, text="VOLVER", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_lan)
-            volver.place(x=10, y=10)
-
-            titulo = Label(canvas, text="LAN", font=fonts + str(40), fg=fgColor, bg=bgColor)
-            titulo.place(x=350, y=10)
-
-            ipLabel = Label(canvas, text="Ingrese ip de host:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            ipLabel.place(x=20, y=120)
-
-            ipEntry = Entry(canvas, width=13, font=fonts+str(20))
-            ipEntry.place(x=400, y=120)
-
-            puertosLabel = Label(canvas, text="Ingrese puerto:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            puertosLabel.place(x=20, y=200)
-
-            puertosEntry = Entry(canvas, width=5, font=fonts + str(20))
-            puertosEntry.place(x=400, y=200)
-
-            joinButton = Button(canvas, text="Unirse", font=fonts + str(20), fg=bgColor, bg=fgColor, borderwidth=0, command=star_client)
-            joinButton.place(x=W1/2-200, y=350)
-
-            hostButton = Button(canvas, text="Crear", font=fonts + str(20), fg=bgColor, bg=fgColor, borderwidth=0, command=start_host)
-            hostButton.place(x=W1 / 2+100, y=350)
-
-            infoText = '''Para crear una partida no ingrese nada,
-            si desea unirse a un juego 
-            ingrese la ip del host y puerto.'''
-
-            infoLabel = Label(canvas, text=infoText, justify=LEFT, font=fonts + str(17), fg=fgColor, bg=bgColor)
-            infoLabel.place(x=20, y=450)
 
         # Funcion que abre la ventana de puntuaciones
         def mostrar_puntuaciones():
@@ -1016,16 +731,10 @@ def menu_loop():
             canvas_mostrar_scores.place(x=-1, y=0)
 
             label_mejores = Label(canvas_mostrar_scores, text="Mejores Puntuaciones:", font=fonts + str(20), fg=fgColor, bg=bgColor)
-            label_mejores.place(x=180, y=80)
-
-            names = Label(canvas_mostrar_scores, text="Jugador", font=fonts + str(10), fg=fgColor, bg=bgColor)
-            names.place(x=280, y=150)
-
-            record = Label(canvas_mostrar_scores, text="Tiempo", font=fonts + str(10), fg=fgColor, bg=bgColor)
-            record.place(x=370, y=150)
+            label_mejores.place(x=200, y=40)
 
             canvas_tabla = Canvas(canvas_mostrar_scores, width=HW // 2, height=H2 // 2)
-            canvas_tabla.place(x=270, y=190)
+            canvas_tabla.place(x=200, y=100)
 
             cerrar_scores = Button(canvas_mostrar_scores, text="BACK!", font=fonts + str(20), fg="black", bg="White", borderwidth=0, command=cerrar_mostrar_puntuciones)
             cerrar_scores.place(x=5, y=0)
@@ -1054,7 +763,7 @@ def menu_loop():
                         seccion = Entry(canvas_tabla, text='', width=15, justify=CENTER, bg=bgColor, fg=fgColor)
                         seccion.grid(row=x, column=y)
                         return crearTabla(x, y + 1, columns + [seccion])
-                    seccion = Entry(canvas_tabla, text='', width=10, justify=CENTER, bg=bgColor, fg=fgColor)
+                    seccion = Entry(canvas_tabla, text='', width=30, bg=bgColor, fg=fgColor)
                     seccion.grid(row=x, column=y)
                     return crearTabla(x, y + 1, columns + [seccion])
 
@@ -1090,64 +799,18 @@ def menu_loop():
         playersHightscore = Button(mainCanvas, text='Scores', font=fonts+str(30), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command=mostrar_puntuaciones)
         playersHightscore.place(x=xPoss + 290, y=yPoss + 430)
 
-        practiceButton = Button(mainCanvas, text='Practicar', font=fonts+str(20), fg=fgColor, bg=bgColor, width=xWidth, justify=RIGHT, borderwidth=0, command=practice_mode)
-        practiceButton.place(x=xPoss + 20, y=yPoss + 540)
-
-        lanButton = Button(mainCanvas, image=lan_icon, borderwidth=2, command=lan_mode)
-        lanButton.place(x=xPoss + 720, y=yPoss + 530)
-
     # Funcion abre la ventana de puntuaciones
     def puntuaciones(fgColor, bgColor, fonts):
-
-        # Funcion que convierte el archivo plano Scores.txt a una lista
-        def splitScores(a, L):
-            if a == L:
-                return ''
-            else:
-                scoresList[a] = scoresList[a].replace('\n', '').split(';')
-                return splitScores(a + 1, L)
-
-        scores = open('Scores.txt', 'r')
-        scoresList = scores.readlines()
-        scores.close()
-        splitScores(0, len(scoresList))
-
-        # Funcion para cerrar ventana puntuacione
-        def cerrar_puntuaciones():
-            jugador = escribir_jugadores.get()
-            tiempo = int(secs)
-            if revisarTop(scoresList, jugador, tiempo):
-                agregar_puntuaciones = open('Scores.txt', 'w')
-                agregar_puntuaciones.write(scoresList[0][0] + ';' + scoresList[0][1])
-                agregar_puntuaciones.write('\n')
-                agregar_puntuaciones.write(scoresList[1][0] + ';' + scoresList[1][1])
-                agregar_puntuaciones.write('\n')
-                agregar_puntuaciones.write(scoresList[2][0] + ';' + scoresList[2][1])
-                agregar_puntuaciones.write('\n')
-                agregar_puntuaciones.close()
+        def cerrar_puntuaciones():  # Funcion para cerrar ventana puntuacione
+            global secs
+            agregar_puntuaciones = open('Scores.txt', 'a')
+            agregar_puntuaciones.write(escribir_jugadores.get())
+            agregar_puntuaciones.write(';')
+            agregar_puntuaciones.write("su tiempo es " + str(int(secs)) + " segundos")
+            agregar_puntuaciones.write('\n')
+            agregar_puntuaciones.close()
             main.deiconify()
             ventana_scores.destroy()
-
-        # Funcion para revisar la lista y ordenar el top 3
-        def revisarTop(lista, jugador, tiempo):
-            if int(lista[0][1]) > tiempo:
-                record1 = lista[0]
-                record2 = lista[1]
-                lista[0] = [jugador, str(tiempo)]
-                lista[1] = record1
-                lista[2] = record2
-                return True
-            elif int(lista[1][1]) > tiempo:
-                tmp = lista[1]
-                lista[1][0] = jugador
-                lista[1][1] = str(tiempo)
-                lista[2][0] = tmp
-                return True
-            elif int(lista[2][1]) > tiempo:
-                lista[2][0] = jugador
-                lista[2][1] = str(tiempo)
-            else:
-                return False
 
         main.withdraw()
 
@@ -1160,7 +823,7 @@ def menu_loop():
         canvas_scores = Canvas(ventana_scores, width=HW, height=HH, bg="black")
         canvas_scores.place(x=-1, y=0)
 
-        label_scores = Label(canvas_scores, text="Digite iniciales del jugador:", font=fonts + str(20), fg=fgColor, bg=bgColor)
+        label_scores = Label(canvas_scores, text="Digite nombre de jugador:", font=fonts + str(20), fg=fgColor, bg=bgColor)
         label_scores.place(x=150, y=120)
 
         escribir_jugadores = Entry(canvas_scores, width=30)
@@ -1179,7 +842,7 @@ def menu_loop():
 
     load_interface(0, 0, 10, 'white', 'black', 'Fixedsys ')
 
-    if scores_game:  # Inicia la ventana para ingresar datos de puntaje
+    if end_game:  # Inicia la ventana para ingresar datos de puntaje
         puntuaciones('white', 'black', 'Fixedsys ')
 
     main.protocol('WM_DELETE_WINDOW', Quit)
@@ -1188,63 +851,23 @@ def menu_loop():
 
 # Inicia el juego
 def game_loop():
-    global pause
     global secs
     global loop
     global run_game
-    global starting_game_speed
-    global pallets_size
-    global Server
-    global Cliente
-    global lanBall
-    global lanPallet
-    global run_lan
-    global datos2
-    global volume
     time1 = time.time()
     py.init()
     display = py.display.set_mode((W, H))
     py.display.set_caption('Pong')
     clock = py.time.Clock()
 
-    # Funcion que mantiene en espera el juego en LAN mientras alguien se une
-    def waiting_screen():
-        global run_game
-        global loop
-        global Cliente
-        while Server.get_receive() != 'start':
-            clock.tick(FPS)
-            for events in py.event.get():
-                if events.type == py.QUIT:
-                    Cliente = False
-                    run_game = False
-                    loop = False
-                if events.type == py.KEYUP:
-                    Cliente = False
-
-            # Dibujar textos durante la espera
-            draw_text(display, "Esperando jugador...", (HW, H * 3 / 8), ("Arial", 64, white))
-            py.display.update()
-
-    # Lan init
-    if Server is not None:
-        lan1 = Thread(target=Server.server)
-        lan1.start()
-        waiting_screen()
-    if Cliente is not None:
-        lan2 = Thread(target=Cliente.client)
-        lan2.start()
-
     # Inicia la Clase Game
-    game = Game(players_selected, pallets_selected, difficulty_selected, style_selected, walls_able)
+    game = Game(players_selected, pallets_selected, difficulty_selected, style_selected)
     game.start_game()
-    time1 = time.time()
-    ser.write(b'0')
 
     # Cargar fondo, sonidos y otros
     back_grounds = game.load_images()[2]
     sound_effects = game.get_sound_effects()
-    music = sound_effects[2].play(loops=-1)
+    sound_effects[2].play(loops=-1)
     M = game.get_matrix()
     walls_images = game.load_images()[3]
     walls_spawn = game.get_wall_spawn_rate()
@@ -1252,19 +875,17 @@ def game_loop():
     # Funcion que define cuando se acaba el juego
     def win_game():
         global secs
-        global scores_game
+        global end_game
         global run_game
         time2 = time.time()
         secs = time2 - time1
         run_game = False
-        if game.players == 2:
-            scores_game = True
+        end_game = True
 
     # Funcion que inicia el menu de pausa
     def show_pause():
         global run_game
         global loop
-        global pause
         pause = True
         while pause:
             clock.tick(FPS)
@@ -1279,21 +900,8 @@ def game_loop():
             # Dibujar textos durante la pausa
             draw_text(display, "PAUSA", (HW, H*3/8), ("Arial", 64, white))
             draw_text(display, "Presione cualquiere tecla para continuar", (HW, H*5/8), ("Arial", 22, white))
+
             py.display.update()
-
-    def leerArduino():  # Funcion que lee los dtos que envia el Arduino
-            try:
-                entrada = str(ser.readline())
-                datos = entrada[entrada.index("'") + 1: entrada.index("\\")]
-                if datos == "w":
-                    #move_pallet_up()
-                    pass
-                elif datos == "s":
-                    #move_pallet_down()
-                    pass
-
-            except:
-                pass
 
     # Game loop
     while run_game:
@@ -1303,23 +911,13 @@ def game_loop():
         for event in py.event.get():
             if event.type == py.QUIT:
                 run_game = False
-                run_lan = False
                 loop = False
-                if Server is not None:
-                    Server.set_message('quit')
-                if Cliente is not None:
-                    Cliente.set_message('quit')
-            if event.type == py.KEYDOWN and event.key == eval(return_key):
+            if event.type == py.KEYDOWN and event.key == py.K_ESCAPE:
                 run_game = False
-                run_lan = False
                 secs = 3
-                if Server is not None:
-                    Server.set_message('quit')
-                if Cliente is not None:
-                    Cliente.set_message('quit')
-            if event.type == py.KEYUP and event.key == eval(pause_key) and Cliente is None:
+            if event.type == py.KEYUP and event.key == py.K_p:
                 show_pause()
-            if event.type == py.KEYUP and event.key == eval(matrix_key) and Cliente is None:
+            if event.type == py.KEYUP and event.key == py.K_m:
                 if not matrix_running:
                     def star_matrix():
                         matrix_loop(M)
@@ -1335,9 +933,8 @@ def game_loop():
         # Colisiones paleta con bola
         hits = py.sprite.groupcollide(players, balls, False, False)
         if hits:
-            hit_sound = sound_effects[0].play()
-            hit_sound.set_volume(volume)
-            if game.wall == 1 and random.random() > walls_spawn:
+            sound_effects[0].play()
+            if random.random() > walls_spawn:
                 wall = Wall(M, walls_images)
                 sprites.add(wall)
                 walls.add(wall)
@@ -1357,48 +954,14 @@ def game_loop():
 
         # Colisiones bola con muros
         if py.sprite.groupcollide(balls, walls, False, True):
-            hit_sound = sound_effects[0].play()
-            hit_sound.set_volume(volume)
+            sound_effects[0].play()
             for element in balls:
                 element.set_xSpeed()
-                element.ySpeed = random.randrange(-angle_hit, angle_hit)
-
-        # Mensajes del Servidor-Cliente
-        if run_lan:
-            localPallet = players.get_sprite(0).get_y()
-            clientPallet = players.get_sprite(1).get_y()
-            localBall = balls.get_top_sprite().get_ball_center()
-            if Server is not None:
-                Server.set_message((localPallet, localBall))
-            if Cliente is not None:
-                Cliente.set_message((clientPallet, localBall))
-                element.ySpeed = random.randrange(-angle_hit, angle_hit)
-
-        # Arduino
-        leerArduino()
-        game_scores = game.get_scores()
-        score1 = game_scores[1]
-        if score1 == 1:
-            ser.write(b'1')
-        elif score1 == 2:
-            ser.write(b'2')
-        elif score1 == 3:
-            ser.write(b'3')
-        elif score1 == 4:
-            ser.write(b'4')
-        elif score1 == 5:
-            ser.write(b'6')
-        elif score1 == 2:
-            ser.write(b'7')
-        elif score1 == 2:
-            ser.write(b'8')
-        elif score1 == 9:
-            ser.write(b'9')
+                element.ySpeed = random.randrange(-5, 5)
 
         # Update
         sprites.update()
         game_scores = game.get_scores()
-        music.set_volume(volume)
         if game_scores[0] == top_points or game_scores[1] == top_points:
             win_game()
 
@@ -1410,14 +973,8 @@ def game_loop():
 
         py.display.update()
 
-    # Finaliza y reinicia las variables del juego
-    starting_game_speed = 0
-    pallets_size = 0
     for sprite in sprites:
         sprite.kill()
-    Server = None
-    Cliente = None
-    ser.write(b'0')
     py.quit()
 
 
