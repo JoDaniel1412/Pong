@@ -6,7 +6,6 @@ import serial
 from threading import Thread
 from tkinter import *
 from settings import *
-ser = serial.Serial('COM6', 9600, timeout=0)
 
 # Loop Variables
 pause = False
@@ -31,6 +30,15 @@ Server = None
 Cliente = None
 lanBall = (HW, HH)
 lanPallet = 800
+
+# Arduino Variables
+run_arduino = False
+# noinspection PyBroadException
+try:  # Trata de iniciar la conexion de Arduino
+    ser = serial.Serial('COM6', 9600, timeout=0)
+    run_arduino = True
+except:
+    pass
 
 
 # Clase usada para iniciar el juego con determinados ajustes
@@ -878,6 +886,7 @@ def menu_loop():
                 global pallets_size
                 velocida = velocidadEntry.get()
                 largo = paletaEntry.get()
+                # noinspection PyBroadException
                 try:
                     starting_game_speed = int(velocida)
                     pallets_size = int(largo)
@@ -1059,7 +1068,7 @@ def menu_loop():
                     return crearTabla(x, y + 1, columns + [seccion])
 
             # Funcion que llena la tabla anteriormente creada
-            def llenarTabla(x, y):  # funcion que llena la tabla para vendedores con el vendedores.txt
+            def llenarTabla(x, y):
                 global tabla
                 if x == len(listaScores):
                     return
@@ -1200,7 +1209,6 @@ def game_loop():
     global lanPallet
     global run_lan
     global datos2
-    global volume
     time1 = time.time()
     py.init()
     display = py.display.set_mode((W, H))
@@ -1239,7 +1247,8 @@ def game_loop():
     game = Game(players_selected, pallets_selected, difficulty_selected, style_selected, walls_able)
     game.start_game()
     time1 = time.time()
-    ser.write(b'0')
+    if run_arduino:
+        ser.write(b'0')
 
     # Cargar fondo, sonidos y otros
     back_grounds = game.load_images()[2]
@@ -1281,19 +1290,39 @@ def game_loop():
             draw_text(display, "Presione cualquiere tecla para continuar", (HW, H*5/8), ("Arial", 22, white))
             py.display.update()
 
-    def leerArduino():  # Funcion que lee los dtos que envia el Arduino
+    # Funcion que lee los datos que envia el Arduino
+    # noinspection PyArgumentList,PyBroadException
+    def leerArduino():
             try:
                 entrada = str(ser.readline())
                 datos = entrada[entrada.index("'") + 1: entrada.index("\\")]
                 if datos == "w":
-                    #move_pallet_up()
+                    # move_pallet_up()
                     pass
                 elif datos == "s":
-                    #move_pallet_down()
+                    # move_pallet_down()
                     pass
-
             except:
                 pass
+
+    # Funcion que envia los datos del contador al Arduino
+    def sendArduino():
+        if score1 == 1:
+            ser.write(b'1')
+        elif score1 == 2:
+            ser.write(b'2')
+        elif score1 == 3:
+            ser.write(b'3')
+        elif score1 == 4:
+            ser.write(b'4')
+        elif score1 == 5:
+            ser.write(b'6')
+        elif score1 == 2:
+            ser.write(b'7')
+        elif score1 == 2:
+            ser.write(b'8')
+        elif score1 == 9:
+            ser.write(b'9')
 
     # Game loop
     while run_game:
@@ -1372,28 +1401,13 @@ def game_loop():
                 Server.set_message((localPallet, localBall))
             if Cliente is not None:
                 Cliente.set_message((clientPallet, localBall))
-                element.ySpeed = random.randrange(-angle_hit, angle_hit)
 
         # Arduino
-        leerArduino()
-        game_scores = game.get_scores()
-        score1 = game_scores[1]
-        if score1 == 1:
-            ser.write(b'1')
-        elif score1 == 2:
-            ser.write(b'2')
-        elif score1 == 3:
-            ser.write(b'3')
-        elif score1 == 4:
-            ser.write(b'4')
-        elif score1 == 5:
-            ser.write(b'6')
-        elif score1 == 2:
-            ser.write(b'7')
-        elif score1 == 2:
-            ser.write(b'8')
-        elif score1 == 9:
-            ser.write(b'9')
+        if run_arduino:
+            leerArduino()
+            game_scores = game.get_scores()
+            score1 = game_scores[1]
+            sendArduino()
 
         # Update
         sprites.update()
@@ -1417,7 +1431,8 @@ def game_loop():
         sprite.kill()
     Server = None
     Cliente = None
-    ser.write(b'0')
+    if run_arduino:
+        ser.write(b'0')
     py.quit()
 
 
