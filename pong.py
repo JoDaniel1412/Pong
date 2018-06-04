@@ -4,8 +4,11 @@ from threading import Thread
 from tkinter import *
 import pygame as py
 from settings import *
+import serial
+ser = serial.Serial('COM6', 9600, timeout=0)
 
 # Loop Variables
+pause = False
 loop = True
 run_game = True
 scores_game = False
@@ -13,6 +16,7 @@ matrix_running = False
 tabla = []
 tiempo_funcion = time.time()
 py.mixer.init()
+datos2 = 550
 
 # Sprite Groups
 sprites = py.sprite.Group()
@@ -240,6 +244,13 @@ class Player(py.sprite.Sprite):
             large = pallets_size
         return large
 
+    # Metodo que mueve la paleta
+    def move_pallet_up(self):
+            self.rect.y -= self.speed
+
+    def move_pallet_down(self):
+            self.rect.y += self.speed
+
     # Metodo que obtiene las dimensiones de la paleta
     def get_pallet_size(self):
         return self.rect.center, self.pallet_size, self.poss
@@ -335,9 +346,9 @@ class Player(py.sprite.Sprite):
         # En caso de ser una paleta
         else:
             if self.status[0] and self.status[1] == 'HUMANE':  # Ajusta movimiento del jugador
-                if k[eval(self.keys[0])] and self.rect.top > 0:
+                if (k[eval(self.keys[0])] or datos2 > 600) and self.rect.top > 0:
                     self.rect.y -= self.speed
-                if k[eval(self.keys[1])] and self.rect.bottom < H:
+                if (k[eval(self.keys[1])] or datos2 < 500) and self.rect.bottom < H:
                     self.rect.y += self.speed
             if self.status[0] and self.status[1] == 'CPU':  # Ajusta movimiento del cpu y dificultad
                 tiempo3 = time.time()
@@ -992,11 +1003,14 @@ def menu_loop():
 
 # Inicia el juego
 def game_loop():
+    global pause
     global secs
     global loop
     global run_game
     global starting_game_speed
     global pallets_size
+    global datos2
+    global volume
     time1 = time.time()
     py.init()
     display = py.display.set_mode((W, H))
@@ -1006,6 +1020,7 @@ def game_loop():
     # Inicia la Clase Game
     game = Game(players_selected, pallets_selected, difficulty_selected, style_selected, walls_able)
     game.start_game()
+    ser.write(b'0')
 
     # Cargar fondo, sonidos y otros
     back_grounds = game.load_images()[2]
@@ -1030,6 +1045,7 @@ def game_loop():
     def show_pause():
         global run_game
         global loop
+        global pause
         pause = True
         while pause:
             clock.tick(FPS)
@@ -1047,6 +1063,19 @@ def game_loop():
 
             py.display.update()
 
+    def leerArduino():
+            try:
+                entrada = str(ser.readline())
+                datos = entrada[entrada.index("'") + 1: entrada.index("\\")]
+                if datos == "w":
+                    #move_pallet_up()
+                    pass
+                elif datos == "s":
+                    #move_pallet_down()
+                    pass
+
+            except:
+                pass
     # Game loop
     while run_game:
         global secs
@@ -1105,9 +1134,29 @@ def game_loop():
                 element.set_xSpeed()
                 element.ySpeed = random.randrange(-angle_hit, angle_hit)
 
+        # Arduino
+        leerArduino()
+        game_scores = game.get_scores()
+        score1 = game_scores[1]
+        if score1 == 1:
+            ser.write(b'1')
+        elif score1 == 2:
+            ser.write(b'2')
+        elif score1 == 3:
+            ser.write(b'3')
+        elif score1 == 4:
+            ser.write(b'4')
+        elif score1 == 5:
+            ser.write(b'6')
+        elif score1 == 2:
+            ser.write(b'7')
+        elif score1 == 2:
+            ser.write(b'8')
+        elif score1 == 9:
+            ser.write(b'9')
+
         # Update
         sprites.update()
-        game_scores = game.get_scores()
         music.set_volume(volume)
         if game_scores[0] == top_points or game_scores[1] == top_points:
             win_game()
@@ -1125,6 +1174,7 @@ def game_loop():
     for sprite in sprites:
         sprite.kill()
     py.quit()
+    ser.write(b'0')
 
 
 # Controla los ciclos entre menu y juego
