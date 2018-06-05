@@ -15,12 +15,12 @@ int contador = 0 ;
 int data;
 
 // Analogic Variables
-#define pinAnalogico0 A0
-#define pinAnalogico1 A1
-#define pinAnalogico2 A2
-int potenciometro = 0;
-int ejeY = 1;
-int ejeX = 2;
+#define pinPotenciometro A0
+#define pinEjeY A1
+#define pinEjeX A2
+int potenciometro;
+int ejeY;
+int ejeX;
 
 // Buttons Variables
 int red_button = 4;
@@ -46,11 +46,11 @@ void setup() {
   pinMode(pinSalida11, OUTPUT); 
   pinMode(pinSalida12, OUTPUT);
   pinMode(pinSalida13, OUTPUT);
-
+/*
   pinMode(red_button, INPUT);
   pinMode(blue_button, INPUT);
   pinMode(white_button, INPUT);
-
+*/
 
   pinMode(ledVerde, OUTPUT); //inicializamos el pin como una salida
   pinMode(ledAzul, OUTPUT);
@@ -69,43 +69,38 @@ void loop() {// Esta fucion se repite infinitamente
     digitalWrite(ledAzul, HIGH);
    digitalWrite(ledVerde, LOW); 
   }
-  if (contador & 180 == 0){
+  if (contador % 20 == 0){
     digitalWrite(ledRojo, HIGH);
     digitalWrite(ledAzul, LOW);
   }
 
   // Lectura de los analogicos
-  potenciometro = analogRead(pinAnalogico0);
-  ejeY = analogRead(pinAnalogico1);
-  ejeX = analogRead(pinAnalogico2);
+  ejeY = analogRead(pinEjeY);
+  ejeX = analogRead(pinEjeX);
+  potenciometro = analogRead(pinPotenciometro);
+  String potenciometroString = "P%" + String(potenciometro);
+  Serial.println(potenciometroString);
 
   if (ejeX > 650)  // Eje X Joystick
     Serial.println(s); 
 
-  if (ejeX < 450)  // Eje X Joystick
+  if (ejeX < 350)  // Eje X Joystick
     Serial.println(w); 
     
   if (ejeY > 650)  // Eje Y Joystick
     Serial.println(s); 
 
-  if (ejeY < 450)  // Eje Y Joystick
+  if (ejeY < 350)  // Eje Y Joystick
     Serial.println(w); 
     
-  // Lectura de los botones
+  /*// Lectura de los botones
   int red_buttonState = digitalRead(red_button);
   int blue_buttonState = digitalRead(blue_button);
   int white_buttonState = digitalRead(white_button);
 
-  if (red_buttonState == 1)  // Red Button
-    Serial.println(st);    
-    
   if (blue_buttonState == 1)  // Blue Button
-    Serial.println(p);
-    
-  if (white_buttonState == 1)  // White Button
-    Serial.println(m);   
-    
-
+    Serial.println(p);    
+  */
   // Lectura del contador
   data = Serial.read();
   Serial.println(data);

@@ -17,7 +17,6 @@ run_lan = False
 tabla = []
 tiempo_funcion = time.time()
 py.mixer.init()
-datos2 = 550
 
 # Sprite Groups
 sprites = py.sprite.Group()
@@ -460,9 +459,9 @@ class Player(py.sprite.Sprite):
             if self.status[0] and self.status[1] == 'ONLINE':  # Ajusta movimiento del jugador en LAN
                 self.rect.y = lanPallet
             if self.status[0] and self.status[1] == 'HUMANE':  # Ajusta movimiento del jugador
-                if (k[eval(self.keys[0])] or datos2 > 600) and self.rect.top > 0:
+                if k[eval(self.keys[0])] and self.rect.top > 0:
                     self.rect.y -= self.speed
-                if (k[eval(self.keys[1])] or datos2 < 500) and self.rect.bottom < H:
+                if k[eval(self.keys[1])] and self.rect.bottom < H:
                     self.rect.y += self.speed
             if self.status[0] and self.status[1] == 'CPU':  # Ajusta movimiento del cpu y dificultad
                 tiempo3 = time.time()
@@ -1209,7 +1208,6 @@ def game_loop():
     global lanBall
     global lanPallet
     global run_lan
-    global datos2
     time1 = time.time()
     py.init()
     display = py.display.set_mode((W, H))
@@ -1367,8 +1365,8 @@ def game_loop():
         # Colisiones paleta con bola
         hits = py.sprite.groupcollide(players, balls, False, False)
         if hits:
-            hit_sound = sound_effects[0].play()
-            hit_sound.set_volume(volume)
+            hit_sound = sound_effects[0]
+            hit_sound.play().set_volume(volume)
             if game.wall == 1 and random.random() > walls_spawn:
                 wall = Wall(M, walls_images)
                 sprites.add(wall)
