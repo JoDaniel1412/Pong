@@ -1317,10 +1317,12 @@ def game_loop():
         elif score1 == 4:
             ser.write(b'4')
         elif score1 == 5:
+            ser.write(b'5')
+        elif score1 == 6:
             ser.write(b'6')
-        elif score1 == 2:
+        elif score1 == 7:
             ser.write(b'7')
-        elif score1 == 2:
+        elif score1 == 8:
             ser.write(b'8')
         elif score1 == 9:
             ser.write(b'9')
@@ -1365,8 +1367,7 @@ def game_loop():
         # Colisiones paleta con bola
         hits = py.sprite.groupcollide(players, balls, False, False)
         if hits:
-            hit_sound = sound_effects[0]
-            hit_sound.play().set_volume(volume)
+            sound_effects[0].play()
             if game.wall == 1 and random.random() > walls_spawn:
                 wall = Wall(M, walls_images)
                 sprites.add(wall)
@@ -1387,8 +1388,7 @@ def game_loop():
 
         # Colisiones bola con muros
         if py.sprite.groupcollide(balls, walls, False, True):
-            hit_sound = sound_effects[0].play()
-            hit_sound.set_volume(volume)
+            sound_effects[0].play()
             for element in balls:
                 element.set_xSpeed()
                 element.ySpeed = random.randrange(-angle_hit, angle_hit)
@@ -1407,7 +1407,7 @@ def game_loop():
         if run_arduino:
             leerArduino()
             game_scores = game.get_scores()
-            score1 = game_scores[1]
+            score1 = game_scores[0]
             sendArduino()
 
         # Update

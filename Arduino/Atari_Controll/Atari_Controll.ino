@@ -18,22 +18,12 @@ int data;
 #define pinPotenciometro A0
 #define pinEjeY A1
 #define pinEjeX A2
-int potenciometro;
-int ejeY;
-int ejeX;
-
-// Buttons Variables
-int red_button = 4;
-int white_button = 5;
-int blue_button = 6;
-String p = "pause";
-String st = "style";
-String m = "mute";
+int potenciometro = 0;
+int ejeY = 1;
+int ejeX = 2;
 
 String w = "w";
 String s = "s";
-String up = "up";
-String down = "down";
 
 void setup() {
 
@@ -46,11 +36,6 @@ void setup() {
   pinMode(pinSalida11, OUTPUT); 
   pinMode(pinSalida12, OUTPUT);
   pinMode(pinSalida13, OUTPUT);
-/*
-  pinMode(red_button, INPUT);
-  pinMode(blue_button, INPUT);
-  pinMode(white_button, INPUT);
-*/
 
   pinMode(ledVerde, OUTPUT); //inicializamos el pin como una salida
   pinMode(ledAzul, OUTPUT);
@@ -69,7 +54,7 @@ void loop() {// Esta fucion se repite infinitamente
     digitalWrite(ledAzul, HIGH);
    digitalWrite(ledVerde, LOW); 
   }
-  if (contador % 20 == 0){
+  if (contador & 20 == 0){
     digitalWrite(ledRojo, HIGH);
     digitalWrite(ledAzul, LOW);
   }
@@ -79,28 +64,20 @@ void loop() {// Esta fucion se repite infinitamente
   ejeX = analogRead(pinEjeX);
   potenciometro = analogRead(pinPotenciometro);
   String potenciometroString = "P%" + String(potenciometro);
-  Serial.println(potenciometroString);
+  Serial.print(ejeX);Serial.print("  ");Serial.println(ejeY);
 
   if (ejeX > 650)  // Eje X Joystick
     Serial.println(s); 
 
-  if (ejeX < 350)  // Eje X Joystick
+  if (ejeX < 300)  // Eje X Joystick
     Serial.println(w); 
     
   if (ejeY > 650)  // Eje Y Joystick
     Serial.println(s); 
 
-  if (ejeY < 350)  // Eje Y Joystick
+  if (ejeY < 300)  // Eje Y Joystick
     Serial.println(w); 
-    
-  /*// Lectura de los botones
-  int red_buttonState = digitalRead(red_button);
-  int blue_buttonState = digitalRead(blue_button);
-  int white_buttonState = digitalRead(white_button);
 
-  if (blue_buttonState == 1)  // Blue Button
-    Serial.println(p);    
-  */
   // Lectura del contador
   data = Serial.read();
   Serial.println(data);
@@ -143,6 +120,4 @@ void loop() {// Esta fucion se repite infinitamente
   digitalWrite(pinSalida8, LOW); //8
   digitalWrite(pinSalida9, HIGH); digitalWrite(pinSalida13, HIGH); digitalWrite(pinSalida12, HIGH); digitalWrite(pinSalida11, HIGH); digitalWrite(pinSalida7, HIGH);digitalWrite(pinSalida10, HIGH); //9
   }
-
-  delay(100);
 }
