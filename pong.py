@@ -35,7 +35,7 @@ lanPallet = 800
 run_arduino = False
 # noinspection PyBroadException
 try:  # Trata de iniciar la conexion de Arduino
-    ser = serial.Serial('COM3', 9600, timeout=0)
+    ser = serial.Serial('COM10', 9600, timeout=0)
     print('Arduino Running')
     run_arduino = True
 except:
@@ -358,10 +358,12 @@ class Player(py.sprite.Sprite):
 
     # Metodo que mueve la paleta
     def move_pallet_up(self):
-            self.rect.y -= self.speed
+        if self.rect.top > 0:
+            self.rect.y -= self.speed * 5
 
     def move_pallet_down(self):
-            self.rect.y += self.speed
+        if self.rect.bottom < H:
+            self.rect.y += self.speed * 5
 
     # Metodo que obtiene las dimensiones de la paleta
     def get_pallet_size(self):
@@ -1209,6 +1211,7 @@ def game_loop():
     global lanBall
     global lanPallet
     global run_lan
+    global volume
     global datos2
     time1 = time.time()
     py.init()
@@ -1278,6 +1281,7 @@ def game_loop():
         pause = True
         while pause:
             clock.tick(FPS)
+            leerArduino()
             for events in py.event.get():
                 if events.type == py.QUIT:
                     pause = False
@@ -1294,19 +1298,32 @@ def game_loop():
     # Funcion que lee los datos que envia el Arduino
     # noinspection PyArgumentList,PyBroadException
     def leerArduino():
-            try:
-                entrada = str(ser.readline())
-                datos = entrada[entrada.index("'") + 1: entrada.index("\\")]
-                print(datos)
-                player1 = players.get_sprite(0)
-                if datos == "w":
-                    player1.move_pallet_up()
-                    pass
-                if datos == "s":
-                    player1.move_pallet_down()
-                    pass
-            except:
+        global volume
+        global pause
+        try:
+            entrada = str(ser.readline())
+            datos = entrada[entrada.index("'") + 1: entrada.index("\\")]
+            print(datos)
+            player1 = players.get_sprite(0)
+            if datos == "w":
+                player1.move_pallet_up()
+            if datos == "pause":
+                if not pause:
+                    show_pause()
+                else:
+                    pause = False
+            if datos == "mute":
+                if volume == 0:
+                    volume = 1
+                else:
+                    volume = 0
+            if datos == "style":
                 pass
+            if datos == "s":
+                player1.move_pallet_down()
+                pass
+        except:
+            pass
 
     # Funcion que envia los datos del contador al Arduino
     def sendArduino():
@@ -1319,10 +1336,12 @@ def game_loop():
         elif score1 == 4:
             ser.write(b'4')
         elif score1 == 5:
+            ser.write(b'5')
+        elif score1 == 6:
             ser.write(b'6')
-        elif score1 == 2:
+        elif score1 == 7:
             ser.write(b'7')
-        elif score1 == 2:
+        elif score1 == 8:
             ser.write(b'8')
         elif score1 == 9:
             ser.write(b'9')
