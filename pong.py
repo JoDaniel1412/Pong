@@ -14,6 +14,7 @@ run_game = True
 scores_game = False
 matrix_running = False
 run_lan = False
+restard = False
 tabla = []
 tiempo_funcion = time.time()
 py.mixer.init()
@@ -1208,7 +1209,9 @@ def game_loop():
     global Cliente
     global lanBall
     global lanPallet
+    global restard
     global run_lan
+    global style_selected
     time1 = time.time()
     py.init()
     display = py.display.set_mode((W, H))
@@ -1291,6 +1294,18 @@ def game_loop():
             draw_text(display, "Presione cualquiere tecla para continuar", (HW, H*5/8), ("Arial", 22, white))
             py.display.update()
 
+    # Funcion que cambia el estilo del juego
+    def switchStyle():
+        global  run_game
+        global restard
+        global style_selected
+        run_game = False
+        restard = True
+        if style_selected == 2:
+            style_selected = 0
+        else:
+            style_selected += 1
+
     # Funcion que lee los datos que envia el Arduino
     # noinspection PyArgumentList,PyBroadException
     def leerArduino():
@@ -1303,6 +1318,7 @@ def game_loop():
             player1 = players.get_sprite(0)
             if datos == "w":
                 player1.move_pallet_up()
+
             if datos == "pause":
                 timeWait = time.time()
                 timeNew = 0
@@ -1311,6 +1327,7 @@ def game_loop():
                     show_pause()
                 else:
                     pause = False
+
             if datos == "mute":
                 timeWait = time.time()
                 timeNew = 0
@@ -1319,11 +1336,12 @@ def game_loop():
                     volume = 1
                 else:
                     volume = 0
+
             if datos == "style":
-                pass
+                switchStyle()
+
             if datos == "s":
                 player1.move_pallet_down()
-                pass
         except:
             pass
 
@@ -1379,6 +1397,8 @@ def game_loop():
                     tkinter_matrix = Thread(target=star_matrix)
                     tkinter_matrix.start()
                     matrix_running = True
+            if event.type == py.KEYDOWN and event.key == eval(switch_style):
+                switchStyle()
 
         # Cronometro
         time_lapsed = py.time.get_ticks()//1000
@@ -1462,4 +1482,8 @@ def game_loop():
 while loop:
     menu_loop()
     if run_game:
+        game_loop()
+    while restard:
+        run_game = True
+        restard = False
         game_loop()
