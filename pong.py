@@ -34,7 +34,7 @@ lanPallet = 800
 run_arduino = False
 # noinspection PyBroadException
 try:  # Trata de iniciar la conexion de Arduino
-    ser = serial.Serial('COM3', 9600, timeout=0)
+    ser = serial.Serial('COM7', 9600, timeout=0)
     print('Arduino Running')
     run_arduino = True
 except:
@@ -358,11 +358,11 @@ class Player(py.sprite.Sprite):
     # Metodo que mueve la paleta
     def move_pallet_up(self):
         if self.rect.top > 0:
-            self.rect.y -= self.speed * 5
+            self.rect.y -= self.speed*5
 
     def move_pallet_down(self):
         if self.rect.bottom < H:
-            self.rect.y += self.speed * 5
+            self.rect.y += self.speed*5
 
     # Metodo que obtiene las dimensiones de la paleta
     def get_pallet_size(self):
@@ -596,8 +596,7 @@ class Ball(py.sprite.Sprite):
             time.sleep(1)
             self.new_ball()
         if not self.game.players == 0 and self.rect.right > W:  # Punto a la derecha
-            sound = self.sound_effects[1].play()
-            sound.set_volume(volume)
+            self.sound_effects[1].play()
             self.game.add_score1()
             time.sleep(1)
             self.new_ball()
@@ -1210,7 +1209,6 @@ def game_loop():
     global lanBall
     global lanPallet
     global run_lan
-    global volume
     time1 = time.time()
     py.init()
     display = py.display.set_mode((W, H))
@@ -1306,12 +1304,18 @@ def game_loop():
             if datos == "w":
                 player1.move_pallet_up()
             if datos == "pause":
-                if not pause:
+                timeWait = time.time()
+                timeNew = 0
+                if not pause and timeWait - timeNew > 10000:
+                    timeNew = time.time()
                     show_pause()
                 else:
                     pause = False
             if datos == "mute":
-                if volume == 0:
+                timeWait = time.time()
+                timeNew = 0
+                if volume == 0 and timeWait - timeNew > 10000:
+                    timeNew = time.time()
                     volume = 1
                 else:
                     volume = 0

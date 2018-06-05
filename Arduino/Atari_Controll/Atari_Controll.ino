@@ -50,11 +50,11 @@ void loop() {// Esta fucion se repite infinitamente
     digitalWrite(ledVerde, HIGH);//pone 5V en el pin (enciende el LED)
     digitalWrite(ledRojo, LOW);
   }
-  if (contador % 120 == 0){
+  else if (contador % 120 == 0){
     digitalWrite(ledAzul, HIGH);
    digitalWrite(ledVerde, LOW); 
   }
-  if (contador & 20 == 0){
+  else if (contador & 20 == 0){
     digitalWrite(ledRojo, HIGH);
     digitalWrite(ledAzul, LOW);
   }
@@ -64,7 +64,7 @@ void loop() {// Esta fucion se repite infinitamente
   ejeX = analogRead(pinEjeX);
   potenciometro = analogRead(pinPotenciometro);
   String potenciometroString = "P%" + String(potenciometro);
-  Serial.print(ejeX);Serial.print("  ");Serial.println(ejeY);
+  Serial.println(potenciometroString);
 
   if (ejeX > 650)  // Eje X Joystick
     Serial.println(s); 
@@ -85,7 +85,7 @@ void loop() {// Esta fucion se repite infinitamente
   digitalWrite(pinSalida9, LOW); digitalWrite(pinSalida8, LOW); digitalWrite(pinSalida13, LOW); digitalWrite(pinSalida12, LOW); digitalWrite(pinSalida11, LOW); digitalWrite(pinSalida7, LOW);digitalWrite(pinSalida10, LOW); //8
   digitalWrite(pinSalida9, HIGH); digitalWrite(pinSalida8, HIGH); digitalWrite(pinSalida13, HIGH); digitalWrite(pinSalida12, HIGH); digitalWrite(pinSalida11, HIGH); digitalWrite(pinSalida7, HIGH); //0
   }
-  if (data == 49){
+  else if (data == 49){
   digitalWrite(pinSalida9, LOW); digitalWrite(pinSalida8, LOW); digitalWrite(pinSalida13, LOW); digitalWrite(pinSalida12, LOW); digitalWrite(pinSalida11, LOW); digitalWrite(pinSalida7, LOW); //0
   digitalWrite(pinSalida13, HIGH); digitalWrite(pinSalida9, HIGH); //1
   }
@@ -93,30 +93,30 @@ void loop() {// Esta fucion se repite infinitamente
   digitalWrite(pinSalida13, LOW); digitalWrite(pinSalida9, LOW); //1
   digitalWrite(pinSalida8, HIGH); digitalWrite(pinSalida7, HIGH); digitalWrite(pinSalida10, HIGH); digitalWrite(pinSalida13, HIGH); digitalWrite(pinSalida12, HIGH); //2
   }
-  if (data == 51){
+  else if (data == 51){
   digitalWrite(pinSalida8, LOW); digitalWrite(pinSalida7, LOW); digitalWrite(pinSalida10, LOW); digitalWrite(pinSalida13, LOW); digitalWrite(pinSalida12, LOW); //2
   digitalWrite(pinSalida12, HIGH); digitalWrite(pinSalida13, HIGH); digitalWrite(pinSalida9, HIGH); digitalWrite(pinSalida10, HIGH); digitalWrite(pinSalida7, HIGH);  //3
   }
-  if (data == 52){
+  else if (data == 52){
   digitalWrite(pinSalida12, LOW); digitalWrite(pinSalida13, LOW); digitalWrite(pinSalida9, LOW); digitalWrite(pinSalida10, LOW); digitalWrite(pinSalida7, LOW);  //3
   digitalWrite(pinSalida9, HIGH); digitalWrite(pinSalida10, HIGH); digitalWrite(pinSalida13, HIGH); digitalWrite(pinSalida11, HIGH); //4
   }
-  if (data == 53){
+  else if (data == 53){
   digitalWrite(pinSalida9, LOW); digitalWrite(pinSalida10, LOW); digitalWrite(pinSalida13, LOW); digitalWrite(pinSalida11, LOW); //4
   digitalWrite(pinSalida7, HIGH); digitalWrite(pinSalida9, HIGH); digitalWrite(pinSalida10, HIGH); digitalWrite(pinSalida12, HIGH); digitalWrite(pinSalida11, HIGH); //5
   }
-  if (data == 54){
+  else if (data == 54){
   digitalWrite(pinSalida7, LOW); digitalWrite(pinSalida9, LOW); digitalWrite(pinSalida10, LOW); digitalWrite(pinSalida12, LOW); digitalWrite(pinSalida11, LOW); //5
   digitalWrite(pinSalida8, HIGH); digitalWrite(pinSalida9, HIGH); digitalWrite(pinSalida10, HIGH); digitalWrite(pinSalida7, HIGH); digitalWrite(pinSalida11, HIGH); digitalWrite(pinSalida12, HIGH);//6
   }
-  if (data == 55){
+  else if (data == 55){
   digitalWrite(pinSalida8, LOW); digitalWrite(pinSalida9, LOW); digitalWrite(pinSalida10, LOW); digitalWrite(pinSalida7, LOW); digitalWrite(pinSalida11, LOW); digitalWrite(pinSalida12, LOW);//6
   digitalWrite(pinSalida12, HIGH); digitalWrite(pinSalida13, HIGH); digitalWrite(pinSalida9, HIGH); //7
   }
-  if (data == 56){
+  else if (data == 56){
   digitalWrite(pinSalida9, HIGH); digitalWrite(pinSalida8, HIGH); digitalWrite(pinSalida13, HIGH); digitalWrite(pinSalida12, HIGH); digitalWrite(pinSalida11, HIGH); digitalWrite(pinSalida7, HIGH);digitalWrite(pinSalida10, HIGH); //8
   }
-  if (data == 57){
+  else if (data == 57){
   digitalWrite(pinSalida8, LOW); //8
   digitalWrite(pinSalida9, HIGH); digitalWrite(pinSalida13, HIGH); digitalWrite(pinSalida12, HIGH); digitalWrite(pinSalida11, HIGH); digitalWrite(pinSalida7, HIGH);digitalWrite(pinSalida10, HIGH); //9
   }
