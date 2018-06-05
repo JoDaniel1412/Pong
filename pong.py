@@ -357,10 +357,12 @@ class Player(py.sprite.Sprite):
 
     # Metodo que mueve la paleta
     def move_pallet_up(self):
-            self.rect.y -= self.speed
+        if self.rect.top > 0:
+            self.rect.y -= self.speed * 5
 
     def move_pallet_down(self):
-            self.rect.y += self.speed
+        if self.rect.bottom < H:
+            self.rect.y += self.speed * 5
 
     # Metodo que obtiene las dimensiones de la paleta
     def get_pallet_size(self):
@@ -1208,6 +1210,7 @@ def game_loop():
     global lanBall
     global lanPallet
     global run_lan
+    global volume
     time1 = time.time()
     py.init()
     display = py.display.set_mode((W, H))
@@ -1276,6 +1279,7 @@ def game_loop():
         pause = True
         while pause:
             clock.tick(FPS)
+            leerArduino()
             for events in py.event.get():
                 if events.type == py.QUIT:
                     pause = False
@@ -1292,19 +1296,32 @@ def game_loop():
     # Funcion que lee los datos que envia el Arduino
     # noinspection PyArgumentList,PyBroadException
     def leerArduino():
-            try:
-                entrada = str(ser.readline())
-                datos = entrada[entrada.index("'") + 1: entrada.index("\\")]
-                print(datos)
-                player1 = players.get_sprite(0)
-                if datos == "w":
-                    player1.move_pallet_up()
-                    pass
-                if datos == "s":
-                    player1.move_pallet_down()
-                    pass
-            except:
+        global volume
+        global pause
+        try:
+            entrada = str(ser.readline())
+            datos = entrada[entrada.index("'") + 1: entrada.index("\\")]
+            print(datos)
+            player1 = players.get_sprite(0)
+            if datos == "w":
+                player1.move_pallet_up()
+            if datos == "pause":
+                if not pause:
+                    show_pause()
+                else:
+                    pause = False
+            if datos == "mute":
+                if volume == 0:
+                    volume = 1
+                else:
+                    volume = 0
+            if datos == "style":
                 pass
+            if datos == "s":
+                player1.move_pallet_down()
+                pass
+        except:
+            pass
 
     # Funcion que envia los datos del contador al Arduino
     def sendArduino():
@@ -1407,7 +1424,7 @@ def game_loop():
         if run_arduino:
             leerArduino()
             game_scores = game.get_scores()
-            score1 = game_scores[0]
+            score1 = game_scores[1]
             sendArduino()
 
         # Update
