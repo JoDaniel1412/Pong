@@ -25,7 +25,6 @@ String w = "w";
 String s = "s";
 
 void setup() {
-
   // Inicializa los pines
   Serial.begin(9600);
   pinMode(pinSalida7, OUTPUT);  
@@ -43,7 +42,7 @@ void setup() {
 
 void loop() {  
   //Encendido de Led inferiores
-  /*contador += 1 ;
+  contador += 1 ;
   if (contador % 60 == 0){
     digitalWrite(ledVerde, HIGH);//pone 5V en el pin (enciende el LED)
     digitalWrite(ledRojo, LOW);
@@ -56,28 +55,37 @@ void loop() {
     digitalWrite(ledRojo, HIGH);
     digitalWrite(ledAzul, LOW);
   }
-*/
+
+
   // Lectura del Joystick
   ejeY = analogRead(pinEjeY);
   ejeX = analogRead(pinEjeX);
   //Serial.print(ejeX); Serial.print("  "); Serial.println(ejeY);  // Impime los valores del Joystick  
-  
   /*if (ejeX > 900)  // Eje X Joystick
     Serial.println(s); 
-
-  if (ejeX < 200)  // Eje X Joystick
-    Serial.println(w); */
-  
+  if (ejeX < 700)  // Eje X Joystick
+    Serial.println(w);*/
   if (ejeY < 700)  // Eje Y Joystick
-    Serial.println(w);
-    
+    Serial.println(w);   
   if (ejeY > 900)  // Eje Y Joystick
     Serial.println(s); 
 
+
   // Lectura del potenciometro
-  /*potenciometro = analogRead(pinPotenciometro);
-  String potenciometroString = "P%" + String(potenciometro);
-  Serial.println(potenciometroString);*/
+  potenciometro = analogRead(pinPotenciometro);
+  if (potenciometro > 1000)
+    Serial.println(1);
+  else if (potenciometro > 1000)
+    Serial.println(1);
+  else if (potenciometro > 900)
+    Serial.println(0.7);
+  else if (potenciometro > 800)
+    Serial.println(0.5);
+  else if (potenciometro > 700)
+    Serial.println(0.3);
+  else if (potenciometro < 700)
+    Serial.println(0);
+
     
   // Lectura del contador
   data = Serial.read();

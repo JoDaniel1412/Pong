@@ -1316,10 +1316,14 @@ def game_loop():
         try:
             entrada = str(ser.readline())
             datos = entrada[entrada.index("'") + 1: entrada.index("\\")]
-            print(datos)
             player1 = players.get_sprite(0)
+            print(datos)
+
             if datos == "w":
                 player1.move_pallet_up()
+
+            if datos == "s":
+                player1.move_pallet_down()
 
             if datos == "pause":
                 timeWait = time.time()
@@ -1342,8 +1346,21 @@ def game_loop():
             if datos == "style":
                 switchStyle()
 
-            if datos == "s":
-                player1.move_pallet_down()
+            if datos == '0':
+                volume = 0
+
+            if datos == '0.3':
+                volume = 0.3
+
+            if datos == '0.5':
+                volume = 0.5
+
+            if datos == '0.7':
+                volume = 0.7
+
+            if datos == '1':
+                volume = 1
+
         except:
             pass
 
