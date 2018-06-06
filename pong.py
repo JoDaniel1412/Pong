@@ -33,11 +33,13 @@ lanPallet = 800
 
 # Arduino Variables
 run_arduino = False
+cont = 1  # Contador que evita enviar multiples mensajes repetidos al arduino
 # noinspection PyBroadException
 try:  # Trata de iniciar la conexion de Arduino
-    ser = serial.Serial('COM7', 9600, timeout=0)
+    ser = serial.Serial('COM3', 9600, timeout=0)
     print('Arduino Running')
     run_arduino = True
+    ser.write(b'0')
 except:
     pass
 
@@ -592,7 +594,7 @@ class Ball(py.sprite.Sprite):
         if Cliente is not None:  # En caso de modo LAN
             self.rect.center = lanBall
         if self.rect.left < 0:  # Punto a la izquierda
-            self.sound_effects[1].play().set_volume(volume)
+            self.sound_effects[1].play()
             self.game.add_score2()
             time.sleep(1)
             self.new_ball()
@@ -607,13 +609,13 @@ class Ball(py.sprite.Sprite):
             if self.rect.top <= 0:  # Colision superior
                 self.ySpeed = -self.ySpeed
                 self.rect.top = 1
-                self.sound_effects[0].play().set_volume(volume)
+                self.sound_effects[0].play()
             if self.rect.bottom >= H:  # Colision inferior
                 self.ySpeed = -self.ySpeed
                 self.rect.bottom = H-1
-                self.sound_effects[0].play().set_volume(volume)
+                self.sound_effects[0].play()
             if self.game.players == 0 and self.rect.right > W:  # Colision derecha en modo practica
-                self.sound_effects[0].play().set_volume(volume)
+                self.sound_effects[0].play()
                 self.set_xSpeed()
                 self.ySpeed = random.randrange(-angle_hit, angle_hit)
                 self.rect.right = W-1
@@ -1296,7 +1298,7 @@ def game_loop():
 
     # Funcion que cambia el estilo del juego
     def switchStyle():
-        global  run_game
+        global run_game
         global restard
         global style_selected
         run_game = False
@@ -1346,25 +1348,28 @@ def game_loop():
             pass
 
     # Funcion que envia los datos del contador al Arduino
-    def sendArduino():
-        if score1 == 1:
-            ser.write(b'1')
-        elif score1 == 2:
-            ser.write(b'2')
-        elif score1 == 3:
-            ser.write(b'3')
-        elif score1 == 4:
-            ser.write(b'4')
-        elif score1 == 5:
-            ser.write(b'5')
-        elif score1 == 6:
-            ser.write(b'6')
-        elif score1 == 7:
-            ser.write(b'7')
-        elif score1 == 8:
-            ser.write(b'8')
-        elif score1 == 9:
-            ser.write(b'9')
+    def sendArduino(score):
+        global cont
+        if score == cont:
+            if score == 1:
+                ser.write(b'1')
+            elif score == 2:
+                ser.write(b'2')
+            elif score == 3:
+                ser.write(b'3')
+            elif score == 4:
+                ser.write(b'4')
+            elif score == 5:
+                ser.write(b'5')
+            elif score == 6:
+                ser.write(b'6')
+            elif score == 7:
+                ser.write(b'7')
+            elif score == 8:
+                ser.write(b'8')
+            elif score == 9:
+                ser.write(b'9')
+            cont += 1
 
     # Game loop
     while run_game:
@@ -1448,8 +1453,8 @@ def game_loop():
         if run_arduino:
             leerArduino()
             game_scores = game.get_scores()
-            score1 = game_scores[1]
-            sendArduino()
+            score1 = game_scores[0]
+            sendArduino(score1)
 
         # Update
         sprites.update()
