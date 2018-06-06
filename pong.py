@@ -43,6 +43,11 @@ try:  # Trata de iniciar la conexion de Arduino
 except:
     pass
 
+# Time Variables
+lastTimePaused = time.time()
+lastTimeMuted = time.time()
+lastTimeStyle = time.time()
+
 
 # Clase usada para iniciar el juego con determinados ajustes
 # Instancias: cantidad de jugadores(1 o 2), cantidad de paletas(1 o 2), difficultad(0, 1 o 2), stylo del arte(0, 1, 2)
@@ -1313,11 +1318,14 @@ def game_loop():
     def leerArduino():
         global volume
         global pause
+        global lastTimePaused
+        global lastTimeMuted
+        global lastTimeStyle
         try:
             entrada = str(ser.readline())
             datos = entrada[entrada.index("'") + 1: entrada.index("\\")]
             player1 = players.get_sprite(0)
-            print(datos)
+            # print(datos)
 
             if datos == "w":
                 player1.move_pallet_up()
@@ -1326,25 +1334,28 @@ def game_loop():
                 player1.move_pallet_down()
 
             if datos == "pause":
-                timeWait = time.time()
-                timeNew = 0
-                if not pause and timeWait - timeNew > 10000:
-                    timeNew = time.time()
+                pauseTime = time.time()
+                if not pause and pauseTime-lastTimePaused > buttonsDelay:
+                    lastTimePaused = pauseTime
                     show_pause()
-                else:
+                elif pause and pauseTime - lastTimePaused > buttonsDelay:
                     pause = False
+                    lastTimePaused = pauseTime
 
             if datos == "mute":
-                timeWait = time.time()
-                timeNew = 0
-                if volume == 0 and timeWait - timeNew > 10000:
-                    timeNew = time.time()
+                muteTime = time.time()
+                if volume == 0 and muteTime-lastTimeMuted > buttonsDelay:
+                    lastTimeMuted = muteTime
                     volume = 1
-                else:
+                if volume == 1 and muteTime-lastTimeMuted > buttonsDelay:
                     volume = 0
+                    lastTimeMuted = muteTime
 
             if datos == "style":
-                switchStyle()
+                styleTime = time.time()
+                if styleTime-lastTimeStyle > buttonsDelay:
+                    lastTimeStyle = styleTime
+                    switchStyle()
 
             if datos == '0':
                 volume = 0

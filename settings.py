@@ -7,13 +7,14 @@ blue = (0, 0, 255)
 yellow = (255, 255, 0)
 
 # Variables
-W, H = 1400, 800
+W, H = 1200, 700
 W1, H1 = 800, 600
 W2, H2 = 320, 870
 HW, HH = W // 2, H // 2
 FPS = 60
 secs = 3
 volume = 1
+buttonsDelay = 0.5
 
 # Default Game Settings
 pallets_selected = 1
