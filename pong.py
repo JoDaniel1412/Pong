@@ -44,6 +44,18 @@ try:  # Trata de iniciar la conexion de Arduino
 except:
     pass
 
+# Arduino2 Variables
+run_arduino2 = False
+cont2 = 1  # Contador que evita enviar multiples mensajes repetidos al arduino
+# noinspection PyBroadException
+try:  # Trata de iniciar la conexion de Arduino
+    ser2 = serial.Serial('COM4', 9600, timeout=0)
+    print('Arduino2 Running')
+    run_arduino2 = True
+    ser2.write(b'0')
+except:
+    pass
+
 # Time Variables
 lastTimePaused = time.time()
 lastTimeMuted = time.time()
@@ -1257,8 +1269,6 @@ def game_loop():
     game = Game(players_selected, pallets_selected, difficulty_selected, style_selected, walls_able)
     game.start_game()
     time1 = time.time()
-    if run_arduino:
-        ser.write(b'0')
 
     # Cargar fondo, sonidos y otros
     back_grounds = game.load_images()[2]
@@ -1399,6 +1409,92 @@ def game_loop():
                 ser.write(b'9')
             cont += 1
 
+    # Funcion que lee los datos que envia el Arduino2
+    # noinspection PyArgumentList,PyBroadException
+    def leerArduino2():
+        global volume
+        global pause
+        global lastTimePaused
+        global lastTimeMuted
+        global lastTimeStyle
+        try:
+            entrada = str(ser2.readline())
+            datos = entrada[entrada.index("'") + 1: entrada.index("\\")]
+            player2 = players.get_sprite(1)
+            # print(datos)
+
+            if datos == "w":
+                player2.move_pallet_up()
+
+            if datos == "s":
+                player2.move_pallet_down()
+
+            if datos == "pause":
+                pauseTime = time.time()
+                if not pause and pauseTime - lastTimePaused > buttonsDelay:
+                    lastTimePaused = pauseTime
+                    show_pause()
+                elif pause and pauseTime - lastTimePaused > buttonsDelay:
+                    pause = False
+                    lastTimePaused = pauseTime
+
+            if datos == "mute":
+                muteTime = time.time()
+                if volume == 0 and muteTime - lastTimeMuted > buttonsDelay:
+                    lastTimeMuted = muteTime
+                    volume = 1
+                if volume == 1 and muteTime - lastTimeMuted > buttonsDelay:
+                    volume = 0
+                    lastTimeMuted = muteTime
+
+            if datos == "style":
+                styleTime = time.time()
+                if styleTime - lastTimeStyle > buttonsDelay:
+                    lastTimeStyle = styleTime
+                    switchStyle()
+
+            if datos == '0':
+                volume = 0
+
+            if datos == '0.3':
+                volume = 0.3
+
+            if datos == '0.5':
+                volume = 0.5
+
+            if datos == '0.7':
+                volume = 0.7
+
+            if datos == '1':
+                volume = 1
+
+        except:
+            pass
+
+    # Funcion que envia los datos del contador al Arduino2
+    def sendArduino2(score):
+        global cont2
+        if score == cont2:
+            if score == 1:
+                ser2.write(b'1')
+            elif score == 2:
+                ser2.write(b'2')
+            elif score == 3:
+                ser2.write(b'3')
+            elif score == 4:
+                ser2.write(b'4')
+            elif score == 5:
+                ser2.write(b'5')
+            elif score == 6:
+                ser2.write(b'6')
+            elif score == 7:
+                ser2.write(b'7')
+            elif score == 8:
+                ser2.write(b'8')
+            elif score == 9:
+                ser2.write(b'9')
+            cont2 += 1
+
     # Game loop
     while run_game:
         global secs
@@ -1484,6 +1580,13 @@ def game_loop():
             score1 = game_scores[0]
             sendArduino(score1)
 
+        # Arduino2
+        if run_arduino2:
+            leerArduino2()
+            game_scores = game.get_scores()
+            score2 = game_scores[1]
+            sendArduino2(score2)
+
         # Update
         sprites.update()
         game_scores = game.get_scores()
@@ -1508,6 +1611,8 @@ def game_loop():
     Cliente = None
     if run_arduino:
         ser.write(b'0')
+    if run_arduino2:
+        ser2.write(b'0')
     py.quit()
 
 
