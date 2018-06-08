@@ -36,7 +36,7 @@ run_arduino = False
 cont = 1  # Contador que evita enviar multiples mensajes repetidos al arduino
 # noinspection PyBroadException
 try:  # Trata de iniciar la conexion de Arduino
-    ser = serial.Serial('COM3', 9600, timeout=0)
+    ser = serial.Serial('COM7', 9600, timeout=0)
     print('Arduino Running')
     run_arduino = True
     ser.write(b'0')
@@ -1276,7 +1276,7 @@ def game_loop():
         time2 = time.time()
         secs = time2 - time1
         run_game = False
-        if game.players == 2:
+        if game.players == 2 or game.players == 1:
             scores_game = True
 
     # Funcion que inicia el menu de pausa
