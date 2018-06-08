@@ -37,7 +37,7 @@ run_arduino = False
 cont = 1  # Contador que evita enviar multiples mensajes repetidos al arduino
 # noinspection PyBroadException
 try:  # Trata de iniciar la conexion de Arduino
-    ser = serial.Serial('COM9', 9600, timeout=0)
+    ser = serial.Serial('COM3', 9600, timeout=0)
     print('Arduino Running')
     run_arduino = True
     ser.write(b'0')

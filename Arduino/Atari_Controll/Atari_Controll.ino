@@ -38,6 +38,9 @@ void setup() {
   pinMode(ledVerde, OUTPUT);
   pinMode(ledAzul, OUTPUT);
   pinMode(ledRojo, OUTPUT);
+
+  // Inicia el contador en 0
+  digitalWrite(pinSalida9, HIGH); digitalWrite(pinSalida8, HIGH); digitalWrite(pinSalida13, HIGH); digitalWrite(pinSalida12, HIGH); digitalWrite(pinSalida11, HIGH); digitalWrite(pinSalida7, HIGH); //0
 }
 
 void loop() {  

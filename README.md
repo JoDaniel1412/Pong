@@ -7,6 +7,8 @@ Para activar pausa es con la P.
 
 El movimiento de la paleta es con las teclas W y S, en caso de dos jugadores se usan UpArrow and DownArrow.
 
+El juego puede cambiar de estilo con la tecla X.
+
 En el menu de opciones se pueden ajustar todo con respecto al modo de juego.
 
 Usamos la librerias externas a python como: serial, tkinter y pygame.
