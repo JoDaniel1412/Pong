@@ -36,7 +36,7 @@ run_arduino = False
 cont = 1  # Contador que evita enviar multiples mensajes repetidos al arduino
 # noinspection PyBroadException
 try:  # Trata de iniciar la conexion de Arduino
-    ser = serial.Serial('COM7', 9600, timeout=0)
+    ser = serial.Serial('COM3', 9600, timeout=0)
     print('Arduino Running')
     run_arduino = True
     ser.write(b'0')
@@ -601,12 +601,12 @@ class Ball(py.sprite.Sprite):
         if self.rect.left < 0:  # Punto a la izquierda
             self.sound_effects[1].play()
             self.game.add_score2()
-            time.sleep(1)
+            time.sleep(0.5)
             self.new_ball()
         if not self.game.players == 0 and self.rect.right > W:  # Punto a la derecha
             self.sound_effects[1].play()
             self.game.add_score1()
-            time.sleep(1)
+            time.sleep(0.5)
             self.new_ball()
         else:  # En caso de juego Local
             self.rect.x += self.xSpeed
