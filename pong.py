@@ -7,6 +7,7 @@ from threading import Thread
 from tkinter import *
 from settings import *
 
+
 # Loop Variables
 pause = False
 loop = True
@@ -36,7 +37,7 @@ run_arduino = False
 cont = 1  # Contador que evita enviar multiples mensajes repetidos al arduino
 # noinspection PyBroadException
 try:  # Trata de iniciar la conexion de Arduino
-    ser = serial.Serial('COM3', 9600, timeout=0)
+    ser = serial.Serial('COM9', 9600, timeout=0)
     print('Arduino Running')
     run_arduino = True
     ser.write(b'0')
@@ -1118,52 +1119,51 @@ def menu_loop():
     def puntuaciones(fgColor, bgColor, fonts):
 
         # Funcion que convierte el archivo plano Scores.txt a una lista
-        def splitScores(a, L):
-            if a == L:
-                return ''
-            else:
-                scoresList[a] = scoresList[a].replace('\n', '').split(';')
-                return splitScores(a + 1, L)
+        def separarPuntuaciones(i):
+            if i == len(listaScores):
+                return
+            listaScores[i] = listaScores[i].replace("\n", "").split(";")
+            separarPuntuaciones(i + 1)
 
-        scores = open('Scores.txt', 'r')
-        scoresList = scores.readlines()
-        scores.close()
-        splitScores(0, len(scoresList))
+        file = open("Scores.txt", 'r')
+        listaScores = file.readlines()
+        separarPuntuaciones(0)
+        file.close()
 
         # Funcion para cerrar ventana puntuacione
         def cerrar_puntuaciones():
             jugador = escribir_jugadores.get()
             tiempo = int(secs)
-            if revisarTop(scoresList, jugador, tiempo):
+            if revisarTop(listaScores, jugador, tiempo):
                 agregar_puntuaciones = open('Scores.txt', 'w')
-                agregar_puntuaciones.write(scoresList[0][0] + ';' + scoresList[0][1])
+                agregar_puntuaciones.write(listaScores[0][0] + ';' + listaScores[0][1])
                 agregar_puntuaciones.write('\n')
-                agregar_puntuaciones.write(scoresList[1][0] + ';' + scoresList[1][1])
+                agregar_puntuaciones.write(listaScores[1][0] + ';' + listaScores[1][1])
                 agregar_puntuaciones.write('\n')
-                agregar_puntuaciones.write(scoresList[2][0] + ';' + scoresList[2][1])
+                agregar_puntuaciones.write(listaScores[2][0] + ';' + listaScores[2][1])
                 agregar_puntuaciones.write('\n')
                 agregar_puntuaciones.close()
             main.deiconify()
             ventana_scores.destroy()
 
         # Funcion para revisar la lista y ordenar el top 3
-        def revisarTop(lista, jugador, tiempo):
-            if int(lista[0][1]) > tiempo:
-                record1 = lista[0]
-                record2 = lista[1]
-                lista[0] = [jugador, str(tiempo)]
-                lista[1] = record1
-                lista[2] = record2
+        def revisarTop(listaScores, jugador, tiempo):
+            if int(listaScores[0][1]) > tiempo:
+                record1 = listaScores[0]
+                record2 = listaScores[1]
+                listaScores[0] = [jugador, str(tiempo)]
+                listaScores[1] = record1
+                listaScores[2] = record2
                 return True
-            elif int(lista[1][1]) > tiempo:
-                tmp = lista[1]
-                lista[1][0] = jugador
-                lista[1][1] = str(tiempo)
-                lista[2][0] = tmp
+            elif int(listaScores[1][1]) > tiempo:
+                tmp = listaScores[1]
+                listaScores[1][0] = jugador
+                listaScores[1][1] = str(tiempo)
+                listaScores[2][0] = tmp
                 return True
-            elif int(lista[2][1]) > tiempo:
-                lista[2][0] = jugador
-                lista[2][1] = str(tiempo)
+            elif int(listaScores[2][1]) > tiempo:
+                listaScores[2][0] = jugador
+                listaScores[2][1] = str(tiempo)
             else:
                 return False
 
