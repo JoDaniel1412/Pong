@@ -16,3 +16,11 @@ Usamos la librerias externas a python como: serial, tkinter y pygame.
 Creditos a autores:
 <br />Icons made by <a href="https://www.flaticon.com/authors/prettycons" title="Computer">Computer</a> from <a href="https://www.flaticon.com/"     title="Flaticon">www.flaticon.com</a> is licensed by <a href="http://creativecommons.org/licenses/by/3.0/"     title="Creative Commons BY 3.0" target="_blank">CC 3.0 BY</a></div>
 <br />Art made by <a href="https://opengameart.org/users/deathsbreed" title="Nicolás A.">Nicolás A.</a> from <a href="http://deathsbreedgames.github.io/"     title="DeathsbreedGames">www.flaticon.com</a> is licensed by <a href="https://creativecommons.org/licenses/by-sa/2.0/"     title="Creative Commons BY 2.0" target="_blank">CC-BY-SA</a></div>
+
+Main Menu                  |  Classic
+:-------------------------:|:-------------------------:
+![](img/gui/main.PNG)  |  ![](img/gui/game.PNG)
+
+Neon Field                  |  Baseball Field
+:-------------------------:|:-------------------------:
+![](img/gui/game2.PNG)  |  ![](img/gui/game3.PNG)
